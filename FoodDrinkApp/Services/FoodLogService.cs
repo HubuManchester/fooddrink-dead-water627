@@ -10,9 +10,9 @@ namespace FoodDrinkApp.Services;
 /// Falls back to local in-memory data when the network is unavailable
 /// so the app remains fully usable during demos.
 ///
-/// ALL HttpClient calls are wrapped in Task.Run to push synchronous JSON
-/// serialisation / deserialisation off the main thread, preventing ANR
-/// on Android.
+/// ALL HttpClient calls are wrapped in Task.Run with async lambdas
+/// to push synchronous JSON serialisation / deserialisation off the
+/// main thread, preventing ANR on Android.
 /// </summary>
 public static class FoodLogService
 {
@@ -23,14 +23,24 @@ public static class FoodLogService
 
     /// <summary>
     /// JSON serialiser options configured for mockapi.io.
-    /// CamelCase naming policy ensures .NET properties (Name, RestaurantName)
-    /// map to JSON keys (name, restaurantName) expected by mockapi.io.
-    /// Case-insensitive deserialisation tolerates schema variations.
+    ///
+    /// IncludeFields = true is CRITICAL: FoodModel uses
+    /// CommunityToolkit.Mvvm [ObservableProperty] on private fields.
+    /// System.Text.Json defaults to property-only serialisation and
+    /// would silently skip the source-generated properties unless
+    /// it can also reach the backing fields via IncludeFields.
+    ///
+    /// PropertyNameCaseInsensitive handles mockapi.io's camelCase keys
+    /// (e.g. "restaurantName" → RestaurantName).
+    ///
+    /// PropertyNamingPolicy.CamelCase ensures POST bodies use camelCase
+    /// keys expected by mockapi.io.
     /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+        IncludeFields = true
     };
 
     private static readonly List<FoodModel> LocalFallbackItems =
@@ -132,8 +142,9 @@ public static class FoodLogService
         {
             try
             {
-                var item = await Task.Run(() =>
-                    HttpClient.GetFromJsonAsync<FoodModel>(
+                // async lambda — ensures the inner Task<T> is unwrapped before Task.Run wraps
+                var item = await Task.Run(async () =>
+                    await HttpClient.GetFromJsonAsync<FoodModel>(
                         $"{MockApiConfig.EndpointUrl.TrimEnd('/')}/{Uri.EscapeDataString(id)}",
                         JsonOptions)
                 ).ConfigureAwait(false);
@@ -167,6 +178,7 @@ public static class FoodLogService
         {
             try
             {
+                // async lambda — already correct in the previous version
                 var created = await Task.Run(async () =>
                 {
                     var response = await HttpClient.PostAsJsonAsync(
@@ -210,8 +222,9 @@ public static class FoodLogService
             return;
         }
 
-        var items = await Task.Run(() =>
-            HttpClient.GetFromJsonAsync<List<FoodModel>>(
+        // async lambda — ensures the inner Task<List<T>> is unwrapped inside Task.Run
+        var items = await Task.Run(async () =>
+            await HttpClient.GetFromJsonAsync<List<FoodModel>>(
                 MockApiConfig.EndpointUrl, JsonOptions)
         ).ConfigureAwait(false);
 
@@ -227,6 +240,11 @@ public static class FoodLogService
     //  Internal helpers
     // ──────────────────────────────────────────────
 
+    /// <summary>
+    /// Fetches all items from mockapi.io (or returns the cached list
+    /// when the API is not configured).  Offloads the HTTP + JSON
+    /// work to a thread-pool thread.
+    /// </summary>
     private static async Task<IReadOnlyList<FoodModel>> GetAllAsync()
     {
         if (!MockApiConfig.IsConfigured)
@@ -238,8 +256,10 @@ public static class FoodLogService
 
         try
         {
-            var items = await Task.Run(() =>
-                HttpClient.GetFromJsonAsync<List<FoodModel>>(
+            // async lambda — the inner await unwraps GetFromJsonAsync's Task<List<FoodModel>>
+            // BEFORE the outer Task.Run wraps the result, avoiding the Task<Task<T>> trap.
+            var items = await Task.Run(async () =>
+                await HttpClient.GetFromJsonAsync<List<FoodModel>>(
                     MockApiConfig.EndpointUrl, JsonOptions)
             ).ConfigureAwait(false);
 

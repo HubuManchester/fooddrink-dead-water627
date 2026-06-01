@@ -6,85 +6,102 @@
              x:Class="FoodDrinkApp.Views.AddEntryPage"
              x:DataType="vm:AddEntryPageViewModel"
              Title="{Binding Title}"
-             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}">
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}"
+             SemanticProperties.Description="Add a new food memory — fill in the details of a memorable meal">
 
-    <ScrollView>
+    <ScrollView SemanticProperties.Description="Form to record a new food memory">
         <VerticalStackLayout Padding="22" Spacing="16">
 
-            <!-- Page Header -->
+            <!-- ══════════════ Page Header ══════════════ -->
             <VerticalStackLayout Spacing="6">
                 <Label Text="+ Add Food Memory"
                        FontSize="26"
                        FontAttributes="Bold"
                        TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
-                       SemanticProperties.HeadingLevel="Level1" />
+                       SemanticProperties.HeadingLevel="Level1"
+                       SemanticProperties.Description="Add food memory form — record the details of a meal worth remembering" />
                 <Label Text="Record the details of a meal worth remembering."
                        FontSize="15"
-                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}"
+                       SemanticProperties.Description="Fill in the form below with your dish details, photo, location, date, and rating" />
             </VerticalStackLayout>
 
-            <!-- Form Card -->
+            <!-- ══════════════ Form Card ══════════════ -->
             <Border StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
                     BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                    Padding="16">
+                    Padding="18">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="10" />
+                    <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
-                <VerticalStackLayout Spacing="14">
+                <Border.Shadow>
+                    <Shadow Brush="{AppThemeBinding Light=#20000000, Dark=#40FFFFFF}"
+                            Offset="0,2"
+                            Radius="8"
+                            Opacity="0.15" />
+                </Border.Shadow>
+                <VerticalStackLayout Spacing="16">
 
-                    <!-- Dish Name -->
+                    <!-- ── Dish Name ── -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Dish / Drink Name *"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Required field — the name of the dish or drink" />
                         <Entry Text="{Binding FoodName}"
                                Placeholder="e.g. Braised Pork Belly Rice"
-                               SemanticProperties.Hint="Required: enter the food or drink name" />
+                               SemanticProperties.Description="Input field for the dish or drink name"
+                               SemanticProperties.Hint="Required: enter the food or drink name. Example: Braised Pork Belly Rice" />
                     </VerticalStackLayout>
 
-                    <!-- Restaurant -->
+                    <!-- ── Restaurant ── -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Restaurant / Place *"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Required field — the restaurant or place where you ate" />
                         <Entry Text="{Binding RestaurantName}"
                                Placeholder="e.g. Grandma's Kitchen"
-                               SemanticProperties.Hint="Required: enter the restaurant or place name" />
+                               SemanticProperties.Description="Input field for the restaurant or place name"
+                               SemanticProperties.Hint="Required: enter the restaurant or place name. Example: Grandma's Kitchen" />
                     </VerticalStackLayout>
 
-                    <!-- Review -->
+                    <!-- ── Review ── -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Review *"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Required field — a short review of your dining experience" />
                         <Editor Text="{Binding Review}"
                                 Placeholder="How was the food and the experience?"
                                 AutoSize="TextChanges"
                                 HeightRequest="100"
-                                SemanticProperties.Hint="Required: write a short review" />
+                                SemanticProperties.Description="Input area for a review of your meal"
+                                SemanticProperties.Hint="Required: write a short review. Describe how the food tasted and the overall experience" />
                     </VerticalStackLayout>
 
                     <!-- ──────── Photo (Camera) ──────── -->
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Photo"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Optional — take a photo of your dish using the camera" />
 
-                        <!-- Take Photo button + loading indicator -->
                         <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
                             <Button Text="📷 Take Photo"
                                     FontSize="13"
                                     Command="{Binding TakePhotoCommand}"
                                     BackgroundColor="{AppThemeBinding Light=#F0D6B8, Dark=#4A3417}"
                                     TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Launch the camera to photograph your dish"
                                     SemanticProperties.Hint="Use the camera to take a photo of the dish" />
                             <ActivityIndicator Grid.Column="1"
                                                IsRunning="{Binding IsTakingPhoto}"
                                                IsVisible="{Binding IsTakingPhoto}"
                                                HeightRequest="24"
                                                HorizontalOptions="Start"
-                                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                                               SemanticProperties.Description="Camera is active, capturing photo" />
                         </Grid>
 
                         <!-- Photo preview -->
@@ -94,25 +111,26 @@
                                 BackgroundColor="{AppThemeBinding Light=#FFF5E8, Dark=#1E1914}"
                                 HeightRequest="200">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8" />
+                                <RoundRectangle CornerRadius="12" />
                             </Border.StrokeShape>
                             <Image Source="{Binding ImagePath}"
                                    Aspect="AspectFit"
-                                   SemanticProperties.Description="Preview of the captured food photo" />
+                                   SemanticProperties.Description="Preview of the food photo you just captured" />
                         </Border>
                     </VerticalStackLayout>
-                    <!-- ──────── End Photo ──────── -->
 
-                    <!-- Location with GPS button -->
+                    <!-- ── Location with GPS ── -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Location"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Optional — where you ate, can be filled automatically using GPS" />
 
                         <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
                             <Entry Text="{Binding Location}"
                                    Placeholder="e.g. Shanghai, Jing'an District"
-                                   SemanticProperties.Hint="Enter the dining location or use GPS" />
+                                   SemanticProperties.Description="Input field for the dining location"
+                                   SemanticProperties.Hint="Enter the dining location manually, or tap the GPS button to auto-fill" />
 
                             <Button Grid.Column="1"
                                     Text="📍"
@@ -122,89 +140,107 @@
                                     Command="{Binding GetLocationCommand}"
                                     BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1E2A1F}"
                                     TextColor="{AppThemeBinding Light=#2E7D32, Dark=#81C784}"
-                                    SemanticProperties.Hint="Use GPS to fill your current location" />
+                                    SemanticProperties.Description="Get current GPS location and auto-fill the address"
+                                    SemanticProperties.Hint="Use GPS to automatically fill your current location" />
                         </Grid>
 
-                        <!-- GPS loading indicator -->
                         <ActivityIndicator IsRunning="{Binding IsGettingLocation}"
                                            IsVisible="{Binding IsGettingLocation}"
                                            HeightRequest="20"
                                            HorizontalOptions="Start"
-                                           Color="{AppThemeBinding Light=#2E7D32, Dark=#81C784}" />
+                                           Color="{AppThemeBinding Light=#2E7D32, Dark=#81C784}"
+                                           SemanticProperties.Description="GPS is active, determining your location" />
                     </VerticalStackLayout>
 
-                    <!-- Date -->
+                    <!-- ── Date ── -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Date"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="The date of your meal — cannot be set to a future date" />
                         <DatePicker Date="{Binding Date}"
                                     MaximumDate="{x:Static sys:DateTime.Today}"
-                                    SemanticProperties.Hint="Select the meal date" />
+                                    SemanticProperties.Description="Date picker for selecting the meal date"
+                                    SemanticProperties.Hint="Select the meal date. Dates in the future are not allowed" />
                     </VerticalStackLayout>
 
-                    <!-- Rating -->
+                    <!-- ── Rating ── -->
                     <VerticalStackLayout Spacing="6">
                         <Label Text="Rating"
                                FontSize="14" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Rate your meal from one to five stars" />
                         <HorizontalStackLayout Spacing="6">
                             <Button Text="1⭐" FontSize="11"
                                     Command="{Binding SetRatingCommand}" CommandParameter="1"
                                     BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
-                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Rate one out of five stars"
+                                    SemanticProperties.Hint="Set rating to one star" />
                             <Button Text="2⭐" FontSize="11"
                                     Command="{Binding SetRatingCommand}" CommandParameter="2"
                                     BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
-                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Rate two out of five stars"
+                                    SemanticProperties.Hint="Set rating to two stars" />
                             <Button Text="3⭐" FontSize="11"
                                     Command="{Binding SetRatingCommand}" CommandParameter="3"
                                     BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
-                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Rate three out of five stars"
+                                    SemanticProperties.Hint="Set rating to three stars" />
                             <Button Text="4⭐" FontSize="11"
                                     Command="{Binding SetRatingCommand}" CommandParameter="4"
                                     BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
-                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Rate four out of five stars"
+                                    SemanticProperties.Hint="Set rating to four stars" />
                             <Button Text="5⭐" FontSize="11"
                                     Command="{Binding SetRatingCommand}" CommandParameter="5"
                                     BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
-                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Description="Rate five out of five stars — the best score"
+                                    SemanticProperties.Hint="Set rating to five stars" />
                         </HorizontalStackLayout>
-                        <Label Text="{Binding RatingLabel}" FontSize="14"
-                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                        <Label Text="{Binding RatingLabel}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Current selected star rating" />
                     </VerticalStackLayout>
 
                 </VerticalStackLayout>
             </Border>
 
-            <!-- Validation Error -->
+            <!-- ══════════════ Validation Error ══════════════ -->
             <Border IsVisible="{Binding HasValidationError}"
                     StrokeThickness="0"
                     BackgroundColor="{AppThemeBinding Light=#FFE8E0, Dark=#40201C}"
                     Padding="14">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="8" />
+                    <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
                 <Label Text="{Binding ValidationMessage}"
                        TextColor="{AppThemeBinding Light=#B43820, Dark=#FFB4A6}"
-                       FontAttributes="Bold" FontSize="14" />
+                       FontAttributes="Bold" FontSize="14"
+                       SemanticProperties.Description="Form validation error — please correct the highlighted fields" />
             </Border>
 
-            <!-- Loading indicator (visible while saving to cloud) -->
+            <!-- ══════════════ Saving indicator ══════════════ -->
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                                IsVisible="{Binding IsBusy}"
                                HeightRequest="28"
                                Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
-                               SemanticProperties.Description="Saving to cloud" />
+                               SemanticProperties.Description="Saving your food memory to the cloud, please wait" />
 
-            <!-- Save Button -->
+            <!-- ══════════════ Save Button ══════════════ -->
             <Button Text="💾 Save Memory"
                     FontAttributes="Bold" FontSize="16"
                     BackgroundColor="{AppThemeBinding Light=#D9472B, Dark=#FF7D55}"
                     TextColor="#FFFFFF"
                     HeightRequest="52"
                     Command="{Binding SaveCommand}"
-                    SemanticProperties.Hint="Validate and save this food memory" />
+                    SemanticProperties.Description="Validate the form and save this food memory to the cloud"
+                    SemanticProperties.Hint="Validate all fields and save this food memory to your diary" />
 
         </VerticalStackLayout>
     </ScrollView>
