@@ -65,14 +65,72 @@
                                 SemanticProperties.Hint="Required: write a short review" />
                     </VerticalStackLayout>
 
-                    <!-- Location -->
+                    <!-- ──────── Photo (Camera) ──────── -->
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Photo"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+
+                        <!-- Take Photo button + loading indicator -->
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                            <Button Text="📷 Take Photo"
+                                    FontSize="13"
+                                    Command="{Binding TakePhotoCommand}"
+                                    BackgroundColor="{AppThemeBinding Light=#F0D6B8, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}"
+                                    SemanticProperties.Hint="Use the camera to take a photo of the dish" />
+                            <ActivityIndicator Grid.Column="1"
+                                               IsRunning="{Binding IsTakingPhoto}"
+                                               IsVisible="{Binding IsTakingPhoto}"
+                                               HeightRequest="24"
+                                               HorizontalOptions="Start"
+                                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                        </Grid>
+
+                        <!-- Photo preview -->
+                        <Border IsVisible="{Binding HasPhoto}"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                                BackgroundColor="{AppThemeBinding Light=#FFF5E8, Dark=#1E1914}"
+                                HeightRequest="200">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Image Source="{Binding ImagePath}"
+                                   Aspect="AspectFit"
+                                   SemanticProperties.Description="Preview of the captured food photo" />
+                        </Border>
+                    </VerticalStackLayout>
+                    <!-- ──────── End Photo ──────── -->
+
+                    <!-- Location with GPS button -->
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Location"
                                FontSize="14" FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
-                        <Entry Text="{Binding Location}"
-                               Placeholder="e.g. Shanghai, Jing'an District"
-                               SemanticProperties.Hint="Enter the dining location" />
+
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                            <Entry Text="{Binding Location}"
+                                   Placeholder="e.g. Shanghai, Jing'an District"
+                                   SemanticProperties.Hint="Enter the dining location or use GPS" />
+
+                            <Button Grid.Column="1"
+                                    Text="📍"
+                                    FontSize="18"
+                                    WidthRequest="48"
+                                    HeightRequest="48"
+                                    Command="{Binding GetLocationCommand}"
+                                    BackgroundColor="{AppThemeBinding Light=#E8F5E9, Dark=#1E2A1F}"
+                                    TextColor="{AppThemeBinding Light=#2E7D32, Dark=#81C784}"
+                                    SemanticProperties.Hint="Use GPS to fill your current location" />
+                        </Grid>
+
+                        <!-- GPS loading indicator -->
+                        <ActivityIndicator IsRunning="{Binding IsGettingLocation}"
+                                           IsVisible="{Binding IsGettingLocation}"
+                                           HeightRequest="20"
+                                           HorizontalOptions="Start"
+                                           Color="{AppThemeBinding Light=#2E7D32, Dark=#81C784}" />
                     </VerticalStackLayout>
 
                     <!-- Date -->

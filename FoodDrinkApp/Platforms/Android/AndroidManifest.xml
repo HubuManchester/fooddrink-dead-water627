@@ -9,4 +9,14 @@
 	<uses-permission android:name="android.permission.VIBRATE" />
 	<uses-feature android:name="android.hardware.camera" android:required="false" />
 	<uses-feature android:name="android.hardware.location" android:required="false" />
+	<!--
+		Android 11+ (API 30+) Package Visibility rules.
+		Without <queries>, the app cannot see the system camera
+		intent and MediaPicker will throw.
+	-->
+	<queries>
+		<intent>
+			<action android:name="android.media.action.IMAGE_CAPTURE" />
+		</intent>
+	</queries>
 </manifest>
