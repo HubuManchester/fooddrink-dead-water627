@@ -211,6 +211,41 @@ public static class FoodLogService
     }
 
     /// <summary>
+    /// Delete a food memory by ID.  Sends DELETE to mockapi.io when configured;
+    /// always removes from the local cache regardless of network outcome.
+    /// Returns true if the item was found and removed.
+    /// </summary>
+    public static async Task<bool> DeleteAsync(string id)
+    {
+        bool removedLocally = false;
+        lock (CacheLock)
+        {
+            removedLocally = cachedItems.RemoveAll(item => item.Id == id) > 0;
+        }
+
+        if (MockApiConfig.IsConfigured)
+        {
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    var response = await HttpClient.DeleteAsync(
+                        $"{MockApiConfig.EndpointUrl.TrimEnd('/')}/{Uri.EscapeDataString(id)}");
+                    response.EnsureSuccessStatusCode();
+                }).ConfigureAwait(false);
+
+                LastError = null;
+            }
+            catch (Exception ex)
+            {
+                LastError = $"Delete from cloud failed — removed locally. {ex.Message}";
+            }
+        }
+
+        return removedLocally;
+    }
+
+    /// <summary>
     /// Force-refresh the in-memory cache from the mockapi.io endpoint.
     /// Runs the HTTP GET + JSON deserialisation on a background thread.
     /// </summary>

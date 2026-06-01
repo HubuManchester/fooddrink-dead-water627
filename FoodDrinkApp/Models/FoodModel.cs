@@ -5,12 +5,17 @@ namespace FoodDrinkApp.Models;
 
 /// <summary>
 /// Core data model for a food memory entry in the Foodie Log app.
-/// Represents a dining experience with restaurant info, review, photo, location, and date.
+/// Represents a dining experience with restaurant info, review, photo,
+/// location, date, rating, and optional nutrition facts.
 /// </summary>
 public sealed partial class FoodModel : ObservableObject
 {
+    // ── Identity ────────────────────────────────────
+
     [JsonPropertyName("id")]
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
+
+    // ── Core fields ──────────────────────────────────
 
     [JsonPropertyName("name")]
     [ObservableProperty]
@@ -44,6 +49,26 @@ public sealed partial class FoodModel : ObservableObject
     [ObservableProperty]
     private string _tags = string.Empty;
 
+    // ── Nutrition (optional — used by Statistics) ───
+
+    [JsonPropertyName("calories")]
+    [ObservableProperty]
+    private int _calories;
+
+    [JsonPropertyName("protein")]
+    [ObservableProperty]
+    private int _protein;
+
+    [JsonPropertyName("carbs")]
+    [ObservableProperty]
+    private int _carbs;
+
+    [JsonPropertyName("fat")]
+    [ObservableProperty]
+    private int _fat;
+
+    // ── Computed display properties ──────────────────
+
     [JsonIgnore]
     public string DateLabel => Date.ToString("yyyy-MM-dd");
 
@@ -57,4 +82,13 @@ public sealed partial class FoodModel : ObservableObject
     [JsonIgnore]
     public string CardSubtitle =>
         string.IsNullOrWhiteSpace(RestaurantName) ? DateLabel : $"{RestaurantName}  ·  {DateLabel}";
+
+    [JsonIgnore]
+    public bool HasNutrition => Calories > 0 || Protein > 0 || Carbs > 0 || Fat > 0;
+
+    [JsonIgnore]
+    public string NutritionSummary =>
+        HasNutrition
+            ? $"{Calories} kcal  ·  P:{Protein}g  C:{Carbs}g  F:{Fat}g"
+            : string.Empty;
 }

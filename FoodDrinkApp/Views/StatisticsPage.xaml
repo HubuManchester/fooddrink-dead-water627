@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FoodDrinkApp.ViewModels"
+             x:Class="FoodDrinkApp.Views.StatisticsPage"
+             x:DataType="vm:StatisticsViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}"
+             SemanticProperties.Description="Nutrition statistics — macronutrient breakdown and calorie averages">
+
+    <ScrollView SemanticProperties.Description="Scrollable statistics dashboard">
+        <VerticalStackLayout Padding="20" Spacing="20">
+
+            <!-- ══════════════ Page Header ══════════════ -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="📊 Nutrition Statistics"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                       SemanticProperties.HeadingLevel="Level1"
+                       SemanticProperties.Description="Nutrition statistics — macronutrient and calorie analysis" />
+                <Label Text="{Binding EntryCount, StringFormat='Based on {0} food memories'}"
+                       FontSize="14"
+                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}"
+                       SemanticProperties.Description="Number of food entries included in this analysis" />
+            </VerticalStackLayout>
+
+            <!-- ══════════════ Loading ══════════════ -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               HeightRequest="32"
+                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Loading statistics" />
+
+            <!-- ══════════════ Donut Chart Card ══════════════ -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Macronutrient Breakdown"
+                           FontSize="17"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                           SemanticProperties.HeadingLevel="Level2"
+                           SemanticProperties.Description="Donut chart showing protein, carbs, and fat ratios" />
+
+                    <GraphicsView Drawable="{Binding MacroDonut}"
+                                  HeightRequest="260"
+                                  SemanticProperties.Description="Donut chart of protein, carbohydrate, and fat distribution" />
+
+                    <Label Text="{Binding MacroSummaryText}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                           HorizontalTextAlignment="Center"
+                           SemanticProperties.Description="Text summary of macronutrient totals" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════ Bar Chart Card ══════════════ -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Average Calories by Rating"
+                           FontSize="17"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                           SemanticProperties.HeadingLevel="Level2"
+                           SemanticProperties.Description="Bar chart showing average calorie intake grouped by star rating" />
+
+                    <GraphicsView Drawable="{Binding CategoryBarChart}"
+                                  HeightRequest="220"
+                                  SemanticProperties.Description="Horizontal bar chart of average calories per rating group" />
+
+                    <Label Text="{Binding CategorySummaryText}"
+                           FontSize="13"
+                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                           HorizontalTextAlignment="Center"
+                           SemanticProperties.Description="Text summary of calorie statistics" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ══════════════ Totals summary ══════════════ -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                    <VerticalStackLayout Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalProtein, StringFormat='{0}g'}"
+                               FontSize="22" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="#FF6384"
+                               SemanticProperties.Description="Total grams of protein across all entries" />
+                        <Label Text="Protein" FontSize="12" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="1" Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalCarbs, StringFormat='{0}g'}"
+                               FontSize="22" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="#FFCE56"
+                               SemanticProperties.Description="Total grams of carbohydrates across all entries" />
+                        <Label Text="Carbs" FontSize="12" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                    <VerticalStackLayout Grid.Column="2" Spacing="2" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalFat, StringFormat='{0}g'}"
+                               FontSize="22" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="#36A2EB"
+                               SemanticProperties.Description="Total grams of fat across all entries" />
+                        <Label Text="Fat" FontSize="12" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Row="1" Grid.ColumnSpan="3"
+                           Text="{Binding TotalCalories, StringFormat='🔥 {0} total calories'}"
+                           FontSize="14"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                           SemanticProperties.Description="Total calories across all food entries" />
+                </Grid>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

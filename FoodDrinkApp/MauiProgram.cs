@@ -24,13 +24,15 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // Register ViewModels
+        // ── ViewModels ──────────────────────────────
         builder.Services.AddTransient<MainPageViewModel>();
         builder.Services.AddTransient<AddEntryPageViewModel>();
+        builder.Services.AddTransient<StatisticsViewModel>();
 
-        // Register Pages
+        // ── Pages ────────────────────────────────────
         builder.Services.AddTransient<MainPage>();
         builder.Services.AddTransient<AddEntryPage>();
+        builder.Services.AddTransient<StatisticsPage>();
 
 #if DEBUG
         builder.Logging.AddDebug();

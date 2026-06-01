@@ -208,6 +208,44 @@
                                SemanticProperties.Description="Current selected star rating" />
                     </VerticalStackLayout>
 
+                    <!-- ── Nutrition (optional) ── -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Nutrition (optional)"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                               SemanticProperties.Description="Optional — enter nutrition facts for statistics" />
+                        <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="6">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Cal (kcal)" FontSize="11"
+                                       TextColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}" />
+                                <Entry Text="{Binding Calories}" Placeholder="0" Keyboard="Numeric"
+                                       SemanticProperties.Description="Calories in kilocalories"
+                                       SemanticProperties.Hint="Enter calorie amount" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                <Label Text="Protein (g)" FontSize="11"
+                                       TextColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}" />
+                                <Entry Text="{Binding Protein}" Placeholder="0" Keyboard="Numeric"
+                                       SemanticProperties.Description="Protein in grams"
+                                       SemanticProperties.Hint="Enter protein amount" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="2" Spacing="2">
+                                <Label Text="Carbs (g)" FontSize="11"
+                                       TextColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}" />
+                                <Entry Text="{Binding Carbs}" Placeholder="0" Keyboard="Numeric"
+                                       SemanticProperties.Description="Carbohydrates in grams"
+                                       SemanticProperties.Hint="Enter carbohydrate amount" />
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="3" Spacing="2">
+                                <Label Text="Fat (g)" FontSize="11"
+                                       TextColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}" />
+                                <Entry Text="{Binding Fat}" Placeholder="0" Keyboard="Numeric"
+                                       SemanticProperties.Description="Fat in grams"
+                                       SemanticProperties.Hint="Enter fat amount" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+
                 </VerticalStackLayout>
             </Border>
 

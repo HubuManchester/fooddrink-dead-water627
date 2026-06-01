@@ -53,6 +53,20 @@ public partial class AddEntryPageViewModel : BaseViewModel
     [ObservableProperty]
     private bool _isGettingLocation;
 
+    // ── Nutrition (optional) ──────────────────────────
+
+    [ObservableProperty]
+    private int _calories;
+
+    [ObservableProperty]
+    private int _protein;
+
+    [ObservableProperty]
+    private int _carbs;
+
+    [ObservableProperty]
+    private int _fat;
+
     // ── Computed ─────────────────────────────────────
 
     public string RatingLabel => Rating > 0 ? new string('⭐', Rating) : "Tap a star to rate";
@@ -294,6 +308,10 @@ public partial class AddEntryPageViewModel : BaseViewModel
                 Location = Location.Trim(),
                 Date = Date,
                 Rating = Rating,
+                Calories = Calories,
+                Protein = Protein,
+                Carbs = Carbs,
+                Fat = Fat,
                 Tags = $"{FoodName} {RestaurantName}"
             };
 

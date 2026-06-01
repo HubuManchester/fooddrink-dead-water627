@@ -16,13 +16,23 @@
     Shell.TabBarUnselectedColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}">
 
     <!--
-        Foodie Log — our original Food and Drink memory app.
-        MainPage is the sole startup page; AddEntryPage is reached
-        via Shell navigation from the "+ Add Memory" button.
+        Foodie Log bottom tab bar.
+        Tab 1: Foodie Log — browse & search food memories.
+        Tab 2: Statistics — nutrition charts & analytics.
+        AddEntryPage is reached via Shell navigation (not a tab).
     -->
-    <ShellContent
-        Title="Foodie Log"
-        ContentTemplate="{DataTemplate views:MainPage}"
-        Route="MainPage" />
+    <TabBar>
+        <ShellContent
+            Title="Foodie Log"
+            Icon="icon_foods.png"
+            ContentTemplate="{DataTemplate views:MainPage}"
+            Route="MainPage" />
+
+        <ShellContent
+            Title="Statistics"
+            Icon="icon_stats.png"
+            ContentTemplate="{DataTemplate views:StatisticsPage}"
+            Route="StatisticsPage" />
+    </TabBar>
 
 </Shell>

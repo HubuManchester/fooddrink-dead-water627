@@ -135,6 +135,38 @@ public partial class MainPageViewModel : BaseViewModel
         await Shell.Current.DisplayAlert(item.Name, item.Review, "OK");
     }
 
+    /// <summary>
+    /// Swipe-to-delete handler.  Sends DELETE to mockapi.io,
+    /// removes the item from the local ObservableCollection with
+    /// a smooth fade removal, and triggers haptic confirmation.
+    /// </summary>
+    [RelayCommand]
+    private async Task DeleteMemoryAsync(FoodModel? item)
+    {
+        if (item is null) return;
+
+        bool confirmed = await Shell.Current.DisplayAlert(
+            "Delete Memory",
+            $"Remove \"{item.Name}\" from your food diary?",
+            "Delete", "Cancel");
+
+        if (!confirmed) return;
+
+        try
+        {
+            await FoodLogService.DeleteAsync(item.Id);
+            FoodMemories.Remove(item);
+            IsEmpty = FoodMemories.Count == 0;
+
+            HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
+            SemanticScreenReader.Announce($"Deleted \"{item.Name}\".");
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlert("Error", $"Could not delete: {ex.Message}", "OK");
+        }
+    }
+
     // ──────────────────────────────────────────────
     //  Status helpers
     // ──────────────────────────────────────────────
