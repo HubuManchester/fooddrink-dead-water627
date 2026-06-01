@@ -1,11 +1,12 @@
-﻿namespace FoodDrinkApp;
+namespace FoodDrinkApp;
 
 public partial class AppShell : Shell
 {
-	public AppShell()
-	{
-		InitializeComponent();
-		Routing.RegisterRoute(nameof(AddItemPage), typeof(AddItemPage));
-		Routing.RegisterRoute(nameof(FoodDetailPage), typeof(FoodDetailPage));
-	}
+    public AppShell()
+    {
+        InitializeComponent();
+
+        // Foodie Log routes — only our own pages are registered.
+        Routing.RegisterRoute(nameof(Views.AddEntryPage), typeof(Views.AddEntryPage));
+    }
 }

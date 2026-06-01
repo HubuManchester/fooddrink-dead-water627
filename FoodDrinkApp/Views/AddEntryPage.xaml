@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FoodDrinkApp.ViewModels"
+             xmlns:sys="clr-namespace:System;assembly=netstandard"
+             x:Class="FoodDrinkApp.Views.AddEntryPage"
+             x:DataType="vm:AddEntryPageViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="22" Spacing="16">
+
+            <!-- Page Header -->
+            <VerticalStackLayout Spacing="6">
+                <Label Text="+ Add Food Memory"
+                       FontSize="26"
+                       FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                       SemanticProperties.HeadingLevel="Level1" />
+                <Label Text="Record the details of a meal worth remembering."
+                       FontSize="15"
+                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}" />
+            </VerticalStackLayout>
+
+            <!-- Form Card -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                    Padding="16">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+
+                    <!-- Dish Name -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Dish / Drink Name *"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <Entry Text="{Binding FoodName}"
+                               Placeholder="e.g. Braised Pork Belly Rice"
+                               SemanticProperties.Hint="Required: enter the food or drink name" />
+                    </VerticalStackLayout>
+
+                    <!-- Restaurant -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Restaurant / Place *"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <Entry Text="{Binding RestaurantName}"
+                               Placeholder="e.g. Grandma's Kitchen"
+                               SemanticProperties.Hint="Required: enter the restaurant or place name" />
+                    </VerticalStackLayout>
+
+                    <!-- Review -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Review *"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <Editor Text="{Binding Review}"
+                                Placeholder="How was the food and the experience?"
+                                AutoSize="TextChanges"
+                                HeightRequest="100"
+                                SemanticProperties.Hint="Required: write a short review" />
+                    </VerticalStackLayout>
+
+                    <!-- Location -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Location"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <Entry Text="{Binding Location}"
+                               Placeholder="e.g. Shanghai, Jing'an District"
+                               SemanticProperties.Hint="Enter the dining location" />
+                    </VerticalStackLayout>
+
+                    <!-- Date -->
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Date"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <DatePicker Date="{Binding Date}"
+                                    MaximumDate="{x:Static sys:DateTime.Today}"
+                                    SemanticProperties.Hint="Select the meal date" />
+                    </VerticalStackLayout>
+
+                    <!-- Rating -->
+                    <VerticalStackLayout Spacing="6">
+                        <Label Text="Rating"
+                               FontSize="14" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                        <HorizontalStackLayout Spacing="6">
+                            <Button Text="1⭐" FontSize="11"
+                                    Command="{Binding SetRatingCommand}" CommandParameter="1"
+                                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                            <Button Text="2⭐" FontSize="11"
+                                    Command="{Binding SetRatingCommand}" CommandParameter="2"
+                                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                            <Button Text="3⭐" FontSize="11"
+                                    Command="{Binding SetRatingCommand}" CommandParameter="3"
+                                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                            <Button Text="4⭐" FontSize="11"
+                                    Command="{Binding SetRatingCommand}" CommandParameter="4"
+                                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                            <Button Text="5⭐" FontSize="11"
+                                    Command="{Binding SetRatingCommand}" CommandParameter="5"
+                                    BackgroundColor="{AppThemeBinding Light=#FFF0C9, Dark=#4A3417}"
+                                    TextColor="{AppThemeBinding Light=#A95517, Dark=#FFD18E}" />
+                        </HorizontalStackLayout>
+                        <Label Text="{Binding RatingLabel}" FontSize="14"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Validation Error -->
+            <Border IsVisible="{Binding HasValidationError}"
+                    StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light=#FFE8E0, Dark=#40201C}"
+                    Padding="14">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <Label Text="{Binding ValidationMessage}"
+                       TextColor="{AppThemeBinding Light=#B43820, Dark=#FFB4A6}"
+                       FontAttributes="Bold" FontSize="14" />
+            </Border>
+
+            <!-- Save Button -->
+            <Button Text="💾 Save Memory"
+                    FontAttributes="Bold" FontSize="16"
+                    BackgroundColor="{AppThemeBinding Light=#D9472B, Dark=#FF7D55}"
+                    TextColor="#FFFFFF"
+                    HeightRequest="52"
+                    Command="{Binding SaveCommand}"
+                    SemanticProperties.Hint="Validate and save this food memory" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
