@@ -8,7 +8,7 @@
              Title="{Binding Title}"
              BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}">
 
-    <Grid RowDefinitions="Auto,Auto,*" Padding="20" RowSpacing="18">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Padding="20" RowSpacing="18">
 
         <!-- Welcome Header -->
         <VerticalStackLayout Spacing="6">
@@ -51,54 +51,81 @@
                     SemanticProperties.Hint="Add a new food memory" />
         </Grid>
 
-        <!-- Food memory list -->
-        <CollectionView Grid.Row="2"
-                        ItemsSource="{Binding FoodMemories}"
-                        SelectionMode="None"
-                        EmptyView="No food memories yet. Tap '+ Add Memory' to create your first entry! 🍽️">
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="models:FoodModel">
-                    <Border StrokeThickness="1"
-                            Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
-                            BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
-                            Padding="16"
-                            Margin="0,0,0,12">
-                        <Border.StrokeShape>
-                            <RoundRectangle CornerRadius="10" />
-                        </Border.StrokeShape>
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=GoToDetailCommand}"
-                                CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
+        <!-- Loading indicator -->
+        <ActivityIndicator Grid.Row="2"
+                           IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}"
+                           HeightRequest="36"
+                           Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                           SemanticProperties.Description="Loading food memories" />
 
-                        <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Label Text="{Binding Name}"
-                                       FontSize="18"
-                                       FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
-                                       SemanticProperties.HeadingLevel="Level2" />
-                                <Label Grid.Column="1"
-                                       Text="{Binding RatingLabel}"
+        <!-- Status banner (cloud / error messages) -->
+        <Border Grid.Row="3"
+                IsVisible="{Binding HasStatusMessage}"
+                StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A3520}"
+                Padding="10,8">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <Label Text="{Binding StatusMessage}"
+                   FontSize="13"
+                   TextColor="{AppThemeBinding Light=#856404, Dark=#FFE69C}"
+                   HorizontalTextAlignment="Center" />
+        </Border>
+
+        <!-- Food memory list with pull-to-refresh -->
+        <RefreshView Grid.Row="4"
+                     IsRefreshing="{Binding IsRefreshing}"
+                     Command="{Binding RefreshCommand}"
+                     RefreshColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}">
+            <CollectionView ItemsSource="{Binding FoodMemories}"
+                            SelectionMode="None"
+                            EmptyView="No food memories yet. Tap '+ Add Memory' to create your first entry! 🍽️">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:FoodModel">
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                                BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                                Padding="16"
+                                Margin="0,0,0,12">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=GoToDetailCommand}"
+                                    CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="6">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="18"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                                           SemanticProperties.HeadingLevel="Level2" />
+                                    <Label Grid.Column="1"
+                                           Text="{Binding RatingLabel}"
+                                           FontSize="14"
+                                           TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                                </Grid>
+                                <Label Grid.Row="1"
+                                       Text="{Binding CardSubtitle}"
                                        FontSize="14"
-                                       TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                                       TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
+                                <Label Grid.Row="2"
+                                       Text="{Binding Review}"
+                                       FontSize="13"
+                                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}"
+                                       MaxLines="2"
+                                       LineBreakMode="TailTruncation" />
                             </Grid>
-                            <Label Grid.Row="1"
-                                   Text="{Binding CardSubtitle}"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}" />
-                            <Label Grid.Row="2"
-                                   Text="{Binding Review}"
-                                   FontSize="13"
-                                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
-                        </Grid>
-                    </Border>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
 
     </Grid>
 </ContentPage>

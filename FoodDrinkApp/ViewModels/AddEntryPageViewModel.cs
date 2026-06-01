@@ -48,19 +48,33 @@ public partial class AddEntryPageViewModel : BaseViewModel
         }
     }
 
+    /// <summary>
+    /// Validate the form, POST to mockapi.io, then navigate back.
+    ///
+    /// FoodLogService.AddAsync runs JSON serialisation + HTTP on a background
+    /// thread (Task.Run).  The ViewModel's await captures the UI thread's
+    /// SynchronizationContext, so the continuation — IsBusy, DisplayAlert,
+    /// GoToAsync — always executes on the main thread.
+    /// </summary>
     [RelayCommand]
     private async Task SaveAsync()
     {
+        if (IsBusy) return;
+
+        // ── Client-side validation (synchronous, fast) ──
+        var error = ValidateForm();
+        if (error is not null)
+        {
+            ShowValidation(error);
+            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(250));
+            return;
+        }
+
+        IsBusy = true;
+        ClearValidation();
+
         try
         {
-            var error = ValidateForm();
-            if (error is not null)
-            {
-                ShowValidation(error);
-                Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(250));
-                return;
-            }
-
             var item = new FoodModel
             {
                 Name = FoodName.Trim(),
@@ -72,18 +86,35 @@ public partial class AddEntryPageViewModel : BaseViewModel
                 Tags = $"{FoodName} {RestaurantName}"
             };
 
-            await FoodLogService.AddAsync(item);
-            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
-            SemanticScreenReader.Announce($"Food memory \"{item.Name}\" saved.");
+            // Offloaded to thread pool inside FoodLogService — won't block UI
+            var saved = await FoodLogService.AddAsync(item);
 
-            await Shell.Current.DisplayAlert("Saved", "Your food memory has been saved.", "OK");
+            // We are back on the UI thread here (SynchronizationContext captured by await)
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            SemanticScreenReader.Announce($"Food memory \"{saved.Name}\" saved.");
+
+            string confirmationMessage = MockApiConfig.IsConfigured
+                ? "Your food memory has been saved to the cloud. 🍜"
+                : "Your food memory has been saved locally.";
+
+            await Shell.Current.DisplayAlert("Saved", confirmationMessage, "OK");
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
         {
-            ShowValidation($"Could not save: {ex.Message}");
+            // FoodLogService.AddAsync falls back to local cache on failure,
+            // so the data is safe — but the user should know.
+            ShowValidation($"Saved locally — cloud unavailable.\n{ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
+
+    // ──────────────────────────────────────────────
+    //  Validation
+    // ──────────────────────────────────────────────
 
     private string? ValidateForm()
     {
@@ -107,5 +138,11 @@ public partial class AddEntryPageViewModel : BaseViewModel
         ValidationMessage = message;
         HasValidationError = true;
         SemanticScreenReader.Announce(message);
+    }
+
+    private void ClearValidation()
+    {
+        ValidationMessage = string.Empty;
+        HasValidationError = false;
     }
 }

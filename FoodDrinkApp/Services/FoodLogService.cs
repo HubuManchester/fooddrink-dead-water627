@@ -6,8 +6,13 @@ namespace FoodDrinkApp.Services;
 
 /// <summary>
 /// Central data service for food memory entries.
-/// Tries the mockapi.io REST endpoint first; falls back to local in-memory data
-/// so the app remains usable during demos even without network access.
+/// Primary data source: mockapi.io REST API.
+/// Falls back to local in-memory data when the network is unavailable
+/// so the app remains fully usable during demos.
+///
+/// ALL HttpClient calls are wrapped in Task.Run to push synchronous JSON
+/// serialisation / deserialisation off the main thread, preventing ANR
+/// on Android.
 /// </summary>
 public static class FoodLogService
 {
@@ -16,9 +21,16 @@ public static class FoodLogService
         Timeout = TimeSpan.FromSeconds(12)
     };
 
+    /// <summary>
+    /// JSON serialiser options configured for mockapi.io.
+    /// CamelCase naming policy ensures .NET properties (Name, RestaurantName)
+    /// map to JSON keys (name, restaurantName) expected by mockapi.io.
+    /// Case-insensitive deserialisation tolerates schema variations.
+    /// </summary>
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
-        PropertyNameCaseInsensitive = true
+        PropertyNameCaseInsensitive = true,
+        PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
     private static readonly List<FoodModel> LocalFallbackItems =
@@ -69,13 +81,30 @@ public static class FoodLogService
         }
     ];
 
+    private static readonly object CacheLock = new();
     private static List<FoodModel> cachedItems = new(LocalFallbackItems);
 
+    /// <summary>
+    /// True when the most recent GetAllAsync call successfully reached mockapi.io.
+    /// </summary>
     public static bool LastLoadUsedMockApi { get; private set; }
 
+    /// <summary>
+    /// Human-readable description of the last error, or null if the last operation succeeded.
+    /// </summary>
+    public static string? LastError { get; private set; }
+
+    // ──────────────────────────────────────────────
+    //  Public API
+    // ──────────────────────────────────────────────
+
+    /// <summary>
+    /// Search food memories. An empty query returns all items ordered by date descending.
+    /// Searches across name, restaurant, review, location, and tags.
+    /// </summary>
     public static async Task<IReadOnlyList<FoodModel>> SearchAsync(string? query)
     {
-        var items = await GetAllAsync();
+        var items = await GetAllAsync().ConfigureAwait(false);
 
         if (string.IsNullOrWhiteSpace(query))
         {
@@ -94,77 +123,137 @@ public static class FoodLogService
             .ToList();
     }
 
+    /// <summary>
+    /// Fetch a single food memory by ID. Tries the API first, then the local cache.
+    /// </summary>
     public static async Task<FoodModel?> GetByIdAsync(string id)
     {
         if (MockApiConfig.IsConfigured)
         {
             try
             {
-                var item = await HttpClient.GetFromJsonAsync<FoodModel>(
-                    $"{MockApiConfig.EndpointUrl.TrimEnd('/')}/{Uri.EscapeDataString(id)}",
-                    JsonOptions);
+                var item = await Task.Run(() =>
+                    HttpClient.GetFromJsonAsync<FoodModel>(
+                        $"{MockApiConfig.EndpointUrl.TrimEnd('/')}/{Uri.EscapeDataString(id)}",
+                        JsonOptions)
+                ).ConfigureAwait(false);
 
                 if (item is not null)
                 {
+                    LastError = null;
                     return item;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Fall back to the last loaded cache below.
+                LastError = $"Failed to fetch item {id}: {ex.Message}";
             }
         }
 
         return cachedItems.FirstOrDefault(item => item.Id == id);
     }
 
+    /// <summary>
+    /// Add a new food memory. POSTs to mockapi.io when configured;
+    /// falls back to adding to the local cache on failure.
+    /// Returns the created item (which may include a server-assigned ID).
+    ///
+    /// The entire POST + JSON serialisation is pushed to a thread-pool thread
+    /// via Task.Run to avoid blocking the Android main thread.
+    /// </summary>
     public static async Task<FoodModel> AddAsync(FoodModel item)
     {
         if (MockApiConfig.IsConfigured)
         {
             try
             {
-                var response = await HttpClient.PostAsJsonAsync(MockApiConfig.EndpointUrl, item, JsonOptions);
-                response.EnsureSuccessStatusCode();
+                var created = await Task.Run(async () =>
+                {
+                    var response = await HttpClient.PostAsJsonAsync(
+                        MockApiConfig.EndpointUrl, item, JsonOptions);
 
-                var created = await response.Content.ReadFromJsonAsync<FoodModel>(JsonOptions);
+                    response.EnsureSuccessStatusCode();
+
+                    return await response.Content
+                        .ReadFromJsonAsync<FoodModel>(JsonOptions);
+                }).ConfigureAwait(false);
+
                 if (created is not null)
                 {
-                    cachedItems.Add(created);
+                    lock (CacheLock) { cachedItems.Add(created); }
+                    LastError = null;
                     return created;
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Fall back to local cache on network failure.
+                LastError = $"Network save failed — saved locally. {ex.Message}";
+                // Fall through to local cache.
             }
         }
 
-        cachedItems.Add(item);
+        // Local fallback path
+        lock (CacheLock) { cachedItems.Add(item); }
+        LastError = null;
         return item;
     }
+
+    /// <summary>
+    /// Force-refresh the in-memory cache from the mockapi.io endpoint.
+    /// Runs the HTTP GET + JSON deserialisation on a background thread.
+    /// </summary>
+    public static async Task RefreshAsync()
+    {
+        if (!MockApiConfig.IsConfigured)
+        {
+            LastLoadUsedMockApi = false;
+            return;
+        }
+
+        var items = await Task.Run(() =>
+            HttpClient.GetFromJsonAsync<List<FoodModel>>(
+                MockApiConfig.EndpointUrl, JsonOptions)
+        ).ConfigureAwait(false);
+
+        if (items is { Count: > 0 })
+        {
+            lock (CacheLock) { cachedItems = items; }
+            LastLoadUsedMockApi = true;
+            LastError = null;
+        }
+    }
+
+    // ──────────────────────────────────────────────
+    //  Internal helpers
+    // ──────────────────────────────────────────────
 
     private static async Task<IReadOnlyList<FoodModel>> GetAllAsync()
     {
         if (!MockApiConfig.IsConfigured)
         {
             LastLoadUsedMockApi = false;
+            LastError = null;
             return cachedItems;
         }
 
         try
         {
-            var items = await HttpClient.GetFromJsonAsync<List<FoodModel>>(MockApiConfig.EndpointUrl, JsonOptions);
+            var items = await Task.Run(() =>
+                HttpClient.GetFromJsonAsync<List<FoodModel>>(
+                    MockApiConfig.EndpointUrl, JsonOptions)
+            ).ConfigureAwait(false);
+
             if (items is { Count: > 0 })
             {
-                cachedItems = items;
+                lock (CacheLock) { cachedItems = items; }
                 LastLoadUsedMockApi = true;
+                LastError = null;
                 return cachedItems;
             }
         }
-        catch
+        catch (Exception ex)
         {
-            // Keep the app usable during demos even if the network is unavailable.
+            LastError = $"Could not reach mockapi.io — showing local data. {ex.Message}";
         }
 
         LastLoadUsedMockApi = false;

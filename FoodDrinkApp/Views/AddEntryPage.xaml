@@ -132,6 +132,13 @@
                        FontAttributes="Bold" FontSize="14" />
             </Border>
 
+            <!-- Loading indicator (visible while saving to cloud) -->
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               HeightRequest="28"
+                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Saving to cloud" />
+
             <!-- Save Button -->
             <Button Text="💾 Save Memory"
                     FontAttributes="Bold" FontSize="16"
