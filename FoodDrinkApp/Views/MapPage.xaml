@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FoodDrinkApp.ViewModels"
+             xmlns:maps="clr-namespace:Microsoft.Maui.Controls.Maps;assembly=Microsoft.Maui.Controls.Maps"
+             x:Class="FoodDrinkApp.Views.MapPage"
+             x:DataType="vm:MapViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}"
+             SemanticProperties.Description="Restaurant map — view where you have eaten on an interactive map">
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20" RowSpacing="14">
+
+        <!-- Header -->
+        <VerticalStackLayout Spacing="4">
+            <Label Text="🗺️  Restaurant Map"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                   SemanticProperties.HeadingLevel="Level1"
+                   SemanticProperties.Description="Interactive map showing all restaurant locations" />
+            <Label Text="{Binding MapSummary}"
+                   FontSize="15"
+                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}"
+                   SemanticProperties.Description="Summary of restaurant pins on the map" />
+        </VerticalStackLayout>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}" HeightRequest="28"
+                           Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+
+        <!--
+            Map control from Microsoft.Maui.Controls.Maps.
+            Pins are added programmatically in OnAppearing (MapPage.xaml.cs).
+            Android requires a Google Maps API key in AndroidManifest.xml
+            (a single com.google.android.geo.API_KEY meta-data entry).
+            The map auto-centres based on pin locations once they are added.
+        -->
+        <maps:Map Grid.Row="2"
+                  x:Name="RestaurantMap"
+                  MapType="Street"
+                  IsShowingUser="False"
+                  SemanticProperties.Description="Interactive map showing where your food memories took place" />
+
+    </Grid>
+</ContentPage>

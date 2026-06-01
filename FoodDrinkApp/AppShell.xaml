@@ -16,10 +16,9 @@
     Shell.TabBarUnselectedColor="{AppThemeBinding Light=#9A7B63, Dark=#BFA58E}">
 
     <!--
-        Foodie Log bottom tab bar.
-        Tab 1: Foodie Log — browse & search food memories.
-        Tab 2: Statistics — nutrition charts & analytics.
-        AddEntryPage is reached via Shell navigation (not a tab).
+        Foodie Log — 5-tab bottom navigation.
+        Tabs: Foodie Log | Gallery | Statistics | Map | Profile
+        AddEntryPage is reached via Shell routing from Foodie Log.
     -->
     <TabBar>
         <ShellContent
@@ -29,10 +28,28 @@
             Route="MainPage" />
 
         <ShellContent
+            Title="Gallery"
+            Icon="icon_gallery.png"
+            ContentTemplate="{DataTemplate views:GalleryPage}"
+            Route="GalleryPage" />
+
+        <ShellContent
             Title="Statistics"
             Icon="icon_stats.png"
             ContentTemplate="{DataTemplate views:StatisticsPage}"
             Route="StatisticsPage" />
+
+        <ShellContent
+            Title="Map"
+            Icon="icon_map.png"
+            ContentTemplate="{DataTemplate views:MapPage}"
+            Route="MapPage" />
+
+        <ShellContent
+            Title="Profile"
+            Icon="icon_profile.png"
+            ContentTemplate="{DataTemplate views:ProfilePage}"
+            Route="ProfilePage" />
     </TabBar>
 
 </Shell>

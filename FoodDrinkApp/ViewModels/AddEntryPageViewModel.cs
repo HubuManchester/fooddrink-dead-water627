@@ -149,6 +149,38 @@ public partial class AddEntryPageViewModel : BaseViewModel
 
             ImagePath = localPath;
             SemanticScreenReader.Announce("Photo captured and saved.");
+
+            // ── AI Computer Vision classification ─────
+            // Open a stream from the saved file and send it to
+            // ComputerVisionService for food recognition.
+            try
+            {
+                SemanticScreenReader.Announce("Analysing photo with AI...");
+
+                using var classifyStream = File.OpenRead(localPath);
+                string aiLabel = await ComputerVisionService.ClassifyFoodImageAsync(classifyStream);
+
+                if (!string.IsNullOrWhiteSpace(aiLabel))
+                {
+                    // Auto-fill the dish name field with the AI result
+                    FoodName = aiLabel;
+
+                    // Haptic confirmation so the user feels the AI result arrive
+                    HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+
+                    SemanticScreenReader.Announce(
+                        $"AI recognised: {aiLabel}. Dish name auto-filled.");
+                }
+            }
+            catch (Exception aiEx)
+            {
+                // CV failure is non-fatal — the photo is still saved,
+                // the user can type the dish name manually.
+                SemanticScreenReader.Announce(
+                    "AI classification unavailable. You can enter the dish name manually.");
+                System.Diagnostics.Debug.WriteLine(
+                    $"ComputerVisionService: {aiEx.Message}");
+            }
         }
         catch (PermissionException)
         {

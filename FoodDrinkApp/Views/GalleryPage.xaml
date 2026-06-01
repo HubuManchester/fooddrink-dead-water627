@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FoodDrinkApp.ViewModels"
+             xmlns:models="clr-namespace:FoodDrinkApp.Models"
+             xmlns:conv="clr-namespace:FoodDrinkApp.Converters"
+             x:Class="FoodDrinkApp.Views.GalleryPage"
+             x:DataType="vm:GalleryViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}"
+             SemanticProperties.Description="Photo gallery — all food photos you have captured">
+
+    <ContentPage.Resources>
+        <conv:InvertBoolConverter x:Key="InvertBool" />
+    </ContentPage.Resources>
+
+    <Grid RowDefinitions="Auto,Auto,*" Padding="20" RowSpacing="14">
+
+        <!-- Header -->
+        <VerticalStackLayout Spacing="4">
+            <Label Text="🖼️  Gallery"
+                   FontSize="26" FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                   SemanticProperties.HeadingLevel="Level1"
+                   SemanticProperties.Description="Food photo gallery — browse all captured food images" />
+            <Label Text="Every delicious photo in one place."
+                   FontSize="15"
+                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}"
+                   SemanticProperties.Description="Scroll through your food photography collection" />
+        </VerticalStackLayout>
+
+        <ActivityIndicator Grid.Row="1" IsRunning="{Binding IsBusy}"
+                           IsVisible="{Binding IsBusy}" HeightRequest="28"
+                           Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+
+        <!-- Content: empty state or photo grid -->
+        <Grid Grid.Row="2">
+
+            <!-- Empty state -->
+            <VerticalStackLayout IsVisible="{Binding IsEmpty}"
+                                 VerticalOptions="Center" HorizontalOptions="Center"
+                                 Spacing="12" Padding="32">
+                <Label Text="📸" FontSize="64" HorizontalOptions="Center"
+                       SemanticProperties.Description="Camera illustration — no photos yet" />
+                <Label Text="No photos yet" FontSize="20" FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                       SemanticProperties.HeadingLevel="Level2" />
+                <Label Text="Take photos when adding food memories to build your gallery."
+                       FontSize="14" HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}"
+                       SemanticProperties.Description="Use the camera button in the Add Memory screen" />
+            </VerticalStackLayout>
+
+            <!-- Photo grid with pull-to-refresh -->
+            <RefreshView IsRefreshing="{Binding IsRefreshing}"
+                         Command="{Binding RefreshGalleryCommand}"
+                         IsVisible="{Binding IsEmpty, Converter={StaticResource InvertBool}}"
+                         RefreshColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                         SemanticProperties.Description="Pull down to refresh the photo gallery">
+                <CollectionView ItemsSource="{Binding Photos}"
+                                SelectionMode="None"
+                                SemanticProperties.Description="Grid of food photos">
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical"
+                                         Span="2"
+                                         HorizontalItemSpacing="10"
+                                         VerticalItemSpacing="10" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="models:FoodModel">
+                            <Border StrokeThickness="1"
+                                    Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                                    BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
+                                    HeightRequest="200"
+                                    Padding="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="12" />
+                                </Border.StrokeShape>
+                                <Grid RowDefinitions="*,Auto">
+                                    <Image Source="{Binding ImagePath}"
+                                           Aspect="AspectFill"
+                                           SemanticProperties.Description="Food photo of {Binding Name}" />
+                                    <Label Grid.Row="1" Text="{Binding Name}"
+                                           FontSize="12" Padding="8,4"
+                                           TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                                           BackgroundColor="{AppThemeBinding Light=#FFF5E8, Dark=#1E1914}"
+                                           LineBreakMode="TailTruncation" MaxLines="1"
+                                           SemanticProperties.Description="Dish name" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </RefreshView>
+
+        </Grid>
+    </Grid>
+</ContentPage>

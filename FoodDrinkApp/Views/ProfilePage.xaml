@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:vm="clr-namespace:FoodDrinkApp.ViewModels"
+             x:Class="FoodDrinkApp.Views.ProfilePage"
+             x:DataType="vm:ProfileViewModel"
+             Title="{Binding Title}"
+             BackgroundColor="{AppThemeBinding Light=#FFF9EF, Dark=#0F1711}"
+             SemanticProperties.Description="User profile — app statistics and settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="18">
+
+            <!-- Header -->
+            <VerticalStackLayout Spacing="4">
+                <Label Text="👤 Profile"
+                       FontSize="26" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                       SemanticProperties.HeadingLevel="Level1"
+                       SemanticProperties.Description="Your Foodie Log profile and statistics" />
+                <Label Text="Your food memory journey at a glance."
+                       FontSize="15"
+                       TextColor="{AppThemeBinding Light=#8B6D55, Dark=#D8C4AC}"
+                       SemanticProperties.Description="Statistics about your food diary usage" />
+            </VerticalStackLayout>
+
+            <ActivityIndicator IsRunning="{Binding IsBusy}"
+                               IsVisible="{Binding IsBusy}"
+                               HeightRequest="28"
+                               Color="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+
+            <!-- Stats Grid -->
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="10" RowSpacing="10">
+                <!-- Card 1: Total Memories -->
+                <Border StrokeThickness="1" Padding="14"
+                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalMemories}" FontSize="28" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Total number of food memories" />
+                        <Label Text="Memories" FontSize="13" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card 2: Photos -->
+                <Border Grid.Column="1" StrokeThickness="1" Padding="14"
+                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalPhotos}" FontSize="28" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Number of food photos taken" />
+                        <Label Text="Photos" FontSize="13" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card 3: Avg Rating -->
+                <Border Grid.Row="1" StrokeThickness="1" Padding="14"
+                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding AverageRating, StringFormat='{0:F1} ⭐'}"
+                               FontSize="24" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Average star rating" />
+                        <Label Text="Avg Rating" FontSize="13" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card 4: Total Calories -->
+                <Border Grid.Row="1" Grid.Column="1" StrokeThickness="1" Padding="14"
+                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="4" HorizontalOptions="Center">
+                        <Label Text="{Binding TotalCalories}" FontSize="24" FontAttributes="Bold"
+                               HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}"
+                               SemanticProperties.Description="Total calories logged" />
+                        <Label Text="Total kcal" FontSize="13" HorizontalTextAlignment="Center"
+                               TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- Card 5: Favourite (full width) -->
+                <Border Grid.Row="2" Grid.ColumnSpan="2" StrokeThickness="1" Padding="16"
+                        Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                        BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="12" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Most Visited" FontSize="12"
+                                   TextColor="{AppThemeBinding Light=#8B6D55, Dark=#BFA58E}" />
+                            <Label Text="{Binding MostVisitedRestaurant}" FontSize="18" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light=#3A2518, Dark=#FFF2DF}"
+                                   SemanticProperties.Description="Your most frequently visited restaurant" />
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1" Text="{Binding TopRestaurantsCount, StringFormat='{0} visits'}"
+                               FontSize="14" VerticalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#D9472B, Dark=#FF9C7B}" />
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Settings Button -->
+            <Button Text="⚙️  Settings"
+                    FontAttributes="Bold" FontSize="15"
+                    BackgroundColor="{AppThemeBinding Light=#F0D6B8, Dark=#4A3417}"
+                    TextColor="{AppThemeBinding Light=#6E5A47, Dark=#D8C4AC}"
+                    HeightRequest="48"
+                    Command="{Binding GoToSettingsCommand}"
+                    SemanticProperties.Description="Open app settings"
+                    SemanticProperties.Hint="Tap to view app version, theme, and accessibility settings" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
