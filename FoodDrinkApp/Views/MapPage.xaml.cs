@@ -4,20 +4,39 @@ using Microsoft.Maui.Controls.Maps;
 
 namespace FoodDrinkApp.Views;
 
+/// <summary>
+/// Interactive restaurant map — places a <see cref="Pin"/> on an
+/// embedded <see cref="Map"/> control for each restaurant location
+/// recorded in the user's food memories.  Location strings are
+/// resolved to coordinates by <see cref="MapViewModel.HashLocation"/>.
+/// </summary>
+/// <remarks>
+/// Android requires a valid Google Maps API key in
+/// <c>AndroidManifest.xml</c>:
+/// <c>&lt;meta-data android:name="com.google.android.geo.API_KEY" ... /&gt;</c>.
+/// Without a real key the map renders as an empty grid — pins still
+/// appear and the app does not crash.
+/// </remarks>
 public partial class MapPage : ContentPage
 {
     private readonly MapViewModel _viewModel;
 
+    /// <summary>Parameterless constructor for Shell DataTemplate instantiation.</summary>
     public MapPage() : this(MauiProgram.Services.GetRequiredService<MapViewModel>())
     {
     }
 
+    /// <summary>DI constructor — receives the ViewModel from the container.</summary>
     public MapPage(MapViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = _viewModel = viewModel;
     }
 
+    /// <summary>
+    /// Applies accessibility scaling, loads pin coordinates from the
+    /// service, and plots them on the map control.
+    /// </summary>
     protected override async void OnAppearing()
     {
         base.OnAppearing();
@@ -27,10 +46,8 @@ public partial class MapPage : ContentPage
     }
 
     /// <summary>
-    /// Places a pin on the map for each restaurant location
-    /// computed by the ViewModel.  The map auto-centres based on
-    /// the pin set on Android/iOS; Windows uses a separate map tile
-    /// service and pins render automatically.
+    /// Clears the map and adds one <see cref="Pin"/> per restaurant
+    /// location returned by the ViewModel.
     /// </summary>
     private void PlotPins()
     {
@@ -40,9 +57,9 @@ public partial class MapPage : ContentPage
         {
             RestaurantMap.Pins.Add(new Pin
             {
-                Label = "🍽️ Restaurant",
+                Label    = "🍽️ Restaurant",
                 Location = loc,
-                Type = PinType.Place
+                Type     = PinType.Place
             });
         }
     }

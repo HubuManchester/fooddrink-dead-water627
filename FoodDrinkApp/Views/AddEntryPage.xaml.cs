@@ -2,6 +2,13 @@ using FoodDrinkApp.Services;
 
 namespace FoodDrinkApp.Views;
 
+/// <summary>
+/// Add-food-memory form page.  Provides text entry for dish name,
+/// restaurant, review, and nutrition facts; camera and GPS hardware
+/// buttons; an AI computer-vision label suggestion; and a star-rating
+/// selector.  On save the entry is POSTed to the cloud via
+/// <see cref="Services.FoodLogService"/>.
+/// </summary>
 public partial class AddEntryPage : ContentPage
 {
     /// <summary>
@@ -12,12 +19,14 @@ public partial class AddEntryPage : ContentPage
     {
     }
 
+    /// <summary>DI constructor — receives the ViewModel from the container.</summary>
     public AddEntryPage(ViewModels.AddEntryPageViewModel viewModel)
     {
         InitializeComponent();
         BindingContext = viewModel;
     }
 
+    /// <summary>Applies large-text accessibility scaling on page appearance.</summary>
     protected override void OnAppearing()
     {
         base.OnAppearing();
