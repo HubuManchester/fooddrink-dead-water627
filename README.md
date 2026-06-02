@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License" />
 </p>
 
-<h1 align="center">🍜 Foodie Log&nbsp;&nbsp;<sub>美食记忆本</sub></h1>
+<h1 align="center">🍜 Foodie Log&nbsp;&nbsp;<sub></sub></h1>
 
 <p align="center">
   <strong>Record every delicious moment.<br/>A cross-platform food memory diary built with .NET MAUI and MVVM.</strong>
@@ -19,7 +19,7 @@
 
 Every entry stores the dish name, restaurant, personal review, photo, GPS location, date, star rating, and optional nutrition facts (calories, protein, carbs, fat). The app connects to a **mockapi.io** REST backend for real-world cloud storage with automatic local fallback — it never crashes offline.
 
-The architecture follows **MVVM** with **CommunityToolkit.Mvvm** source generators, uses **XAML** for declarative UI, and integrates **six mobile hardware** features alongside an **AI computer-vision** scaffolding layer. It has been verified on **Android emulator, Windows Desktop, and multiple screen orientations** (portrait, landscape, tablet).
+The architecture follows **MVVM** with **CommunityToolkit.Mvvm** source generators, uses **XAML** for declarative UI, and integrates **six mobile hardware** features alongside an **advanced computer-vision** scaffolding layer. It has been verified on **Android emulator, Windows Desktop, and multiple screen orientations** (portrait, landscape, tablet).
 
 > 🎓 This project was developed for *6G6Z0014 – Mobile Computing* at **Manchester Metropolitan University** (MMU).
 
@@ -32,7 +32,7 @@ The architecture follows **MVVM** with **CommunityToolkit.Mvvm** source generato
 | **Name** | **yzx** |
 | **Module** | 6G6Z0014 – Mobile Computing |
 | **Institution** | Manchester Metropolitan University |
-| **Assessment** | 1CWK100 – Developing a Cross-Platform Mobile App |
+| **Project** | 1CWK100 – Developing a Cross-Platform Mobile App |
 
 ---
 
@@ -48,7 +48,7 @@ The architecture follows **MVVM** with **CommunityToolkit.Mvvm** source generato
 ### ➕ Adding a Food Memory
 1. Tap the **+ Add Memory** button at the top-right.
 2. Fill in the required fields: **Dish Name**, **Restaurant**, and **Review**.
-3. **(Optional) Take a Photo**: tap 📷 → grant camera permission → capture the photo. After ~1.5 seconds the AI classifier will suggest a dish name and auto-fill it.
+3. **(Optional) Take a Photo**: tap 📷 → grant camera permission → capture the photo. After ~1.5 seconds the image classifier will suggest a dish name and auto-fill it.
 4. **(Optional) Get GPS Location**: tap 📍 → grant location permission. Your current address (city, region, country) is filled automatically.
 5. **(Optional) Nutrition**: enter Calories, Protein, Carbs, and Fat values for statistics.
 6. Tap a **star-rating** button (1⭐–5⭐).
@@ -79,7 +79,7 @@ The architecture follows **MVVM** with **CommunityToolkit.Mvvm** source generato
 ### 🎨 Accessibility Features
 - **Dark / Light theme**: toggled in the Settings section (Profile tab).
 - **Large-text mode**: enlarges all text across every page for readability.
-- **Screen reader (TalkBack)**: every button, entry field, image, and chart has `SemanticProperties` annotations describing its purpose. Key actions (photo capture, AI recognition, save, delete) trigger spoken announcements.
+- **Screen reader (TalkBack)**: every button, entry field, image, and chart has `SemanticProperties` annotations describing its purpose. Key actions (photo capture, smart image recognition, save, delete) trigger spoken announcements.
 
 ---
 
@@ -97,7 +97,7 @@ The project was built incrementally across 10 phases, each captured in a dedicat
 | 4 | **Hardware** | Camera, GPS, Haptic | `MediaPicker`, `Geolocation`, `Geocoding`, runtime permissions, Android 11 `queries` |
 | 5 | **UI/UX** | Accessibility + empty state | 66 `SemanticProperties`, WCAG labels, Grid overlay, `InvertBoolConverter` |
 | 6 | **Gestures + Charts** | Swipe-to-delete + native charts | `SwipeView`, `DeleteMemoryCommand`, `GraphicsView` donut & bar drawables, `StatisticsPage` |
-| 7 | **5-Tab** | Profile, Gallery, Map, AI CV | 5-tab `TabBar`, `ComputerVisionService`, `Microsoft.Maui.Controls.Maps`, photo grid |
+| 7 | **5-Tab** | Profile, Gallery, Map, CV | 5-tab `TabBar`, `ComputerVisionService`, `Microsoft.Maui.Controls.Maps`, photo grid |
 | 8 | **Docs** | XML comments + README | C# XML docs on every class, comprehensive README |
 | 9 | **User Guide** | User instructions + architecture docs | Step-by-step user guide, architecture rationale, deployment scaling notes |
 | 10 | **Polish** | Verified on Android + Windows | All features tested across emulators and both orientations |
@@ -116,7 +116,7 @@ The project was built incrementally across 10 phases, each captured in a dedicat
 └──────────────────────┘
 ```
 
-**Evidence of Code Reusability (scored under "Code Quality 10%"):**
+**Evidence of Code Reusability:**
 
 | Reusable Component | Where It Is Used | Benefit |
 |---|---|---|
@@ -126,7 +126,7 @@ The project was built incrementally across 10 phases, each captured in a dedicat
 | `InvertBoolConverter` | `MainPage.xaml`, `GalleryPage.xaml` | Reusable XAML resource — any page needing inverse visibility imports the same converter |
 | `DonutChartDrawable` / `BarChartDrawable` | `StatisticsPage` | Self-contained `IDrawable` classes; can be dropped into any `GraphicsView` on any page |
 | `ComputerVisionService` | `AddEntryPageViewModel` | Stateless static service; production-ready HTTP scaffold coexists with MVP simulation |
-| `SpeechService` | Detail / help flows | Single TTS wrapper with Chinese locale preference — any page can call `SpeakChineseAsync` |
+| `SpeechService` | Detail / help flows | Single TTS wrapper utilizing native device locale — any page can call `SpeakAsync` |
 
 The **MVVM pattern** itself is a code-reuse pattern: ViewModels have **zero reference to any XAML type**. The same `FoodLogService` is consumed identically by every tab — new features (Gallery, Map, Profile) only needed a thin ViewModel + Page, reusing the existing service layer without modification.
 
@@ -142,33 +142,33 @@ The **MVVM pattern** itself is a code-reuse pattern: ViewModels have **zero refe
 - Debounced search (300 ms) to avoid flooding the API on keystrokes
 - All **public methods documented with C# XML `<summary>`** tags and inline explanatory comments
 
-### 📱 Mobile Hardware (6 features — exceeds 4-feature top-grade threshold)
+### 📱 Mobile Hardware (6 features)
 
-| # | Feature | API | Used In | Scoring Tier |
-|---|---|---|---|---|
-| 1 | **Camera** | `MediaPicker.CapturePhotoAsync()` | AddEntryPage + Gallery | 70-85% |
-| 2 | **GPS** | `Geolocation.GetLocationAsync()` | AddEntryPage (auto-fill) | 70-85% |
-| 3 | **Geocoding** | `Geocoding.GetPlacemarksAsync()` | Address ↔ coordinates | 70-85% |
-| 4 | **Text-to-Speech** | `TextToSpeech.SpeakAsync()` | Detail / help screens | 70-85% |
-| 5 | **Vibration** | `Vibration.Vibrate()` | Validation error feedback | 70-85% |
-| 6 | **Haptic** | `HapticFeedback.Perform()` | Save / delete / AI recognition | 70-85% |
+| # | Feature | API | Used In |
+|---|---|---|---|
+| 1 | **Camera** | `MediaPicker.CapturePhotoAsync()` | AddEntryPage + Gallery |
+| 2 | **GPS** | `Geolocation.GetLocationAsync()` | AddEntryPage (auto-fill) |
+| 3 | **Geocoding** | `Geocoding.GetPlacemarksAsync()` | Address ↔ coordinates |
+| 4 | **Text-to-Speech** | `TextToSpeech.SpeakAsync()` | Detail / help screens |
+| 5 | **Vibration** | `Vibration.Vibrate()` | Validation error feedback |
+| 6 | **Haptic** | `HapticFeedback.Perform()` | Save / delete / smart image recognition |
 
 All 6 hardware features include **runtime permission checks** (`Permissions.CheckStatusAsync` → `RequestAsync`), exception handling, and screen-reader announcements.
 
-### 🎨 UI / UX & Accessibility (WCAG-aligned — 30% scoring weight)
+### 🎨 UI / UX & Accessibility
 - **XAML-first** UI across 6+ pages with `<x:DataType>` compiled bindings
 - Warm food-inspired palette (creamy backgrounds `#FFF9EF`, tomato-red accents `#D9472B`, basil-green `#2E7D32`)
 - **Dark mode** + **Light mode** via `AppThemeBinding` on every colour property
 - **Large-text mode** toggled via `AccessibilityService.ApplyFontScale(this)` on every page
 - **66 `SemanticProperties`** annotations: `HeadingLevel` on headings, `Description` + `Hint` on every interactive control (Button, Entry, Editor, Image, SearchBar, DatePicker, GraphicsView, SwipeView)
-- **Screen-reader narration** at key interaction moments: photo captured, AI label arrived, save confirmed, delete completed
+- **Screen-reader narration** at key interaction moments: photo captured, classification label arrived, save confirmed, delete completed
 - WCAG 2.x principles followed (Perceivable, Operable, Understandable) with clear user instructions on every page
 
-### 🤖 AI Computer Vision (Advanced — 86-100% tier)
+### 🤖 Advanced Computer Vision
 - `ComputerVisionService.ClassifyFoodImageAsync(Stream)` — **production-ready HTTP scaffold** with Hugging Face / Azure Custom Vision API body + Bearer-token authentication headers (commented, ready to activate by uncommenting and inserting a real API key)
 - **MVP simulation**: 1.5 s inference latency → deterministic food label keyed on photo-stream length → auto-fills dish name `Entry.Text`
 - 12 realistic food labels ("Classic Beef Burger", "Fresh Salmon Sushi", "Margherita Pizza", etc.)
-- **Haptic confirmation** (`HapticFeedbackType.Click`) when AI result arrives
+- **Haptic confirmation** (`HapticFeedbackType.Click`) when classification result arrives
 - Failure is **non-fatal**: if CV fails, the photo is still saved and the user can type the dish name manually
 
 ### 📊 Native Charts (GraphicsView — zero external dependencies)
@@ -211,7 +211,7 @@ Foodie Log is built on .NET MAUI's **single-project** architecture. The same C#/
 | **Phone — Landscape** | Grid columns stretch horizontally; `CollectionView` height fills remaining space via `*` row; `ScrollView` on AddEntryPage prevents form truncation |
 | **Tablet — Any orientation** | `Grid Row="*"` ensures the list/grid fills available area; `GridItemsLayout Span="2"` on Gallery auto-adapts; form `Padding` and `Spacing` maintain readability |
 
-**No hard-coded sizes** are used — layouts rely on `Grid` proportional rows (`Auto`, `*`) and `HorizontalOptions`/`VerticalOptions` rather than fixed pixel dimensions. This is a deliberate design choice for the **Deployment (5%)** scoring criterion, where "app should scale correctly to the tablet version" is explicitly listed in the 70-85% and 86-100% grade bands.
+No hard-coded sizes are used — layouts rely on Grid proportional rows (Auto, *) and HorizontalOptions/VerticalOptions rather than fixed pixel dimensions. This deliberate responsive design ensures the application scales seamlessly across mobile and tablet viewports.
 
 ---
 
@@ -251,7 +251,7 @@ FoodDrinkApp/
 ├── ViewModels/
 │   ├── BaseViewModel.cs                    # MVVM base (IsBusy, Title) — inherited by all VMs
 │   ├── MainPageViewModel.cs                # Food list, debounced search, delete, pull-to-refresh
-│   ├── AddEntryPageViewModel.cs            # Form validation, camera, GPS, AI CV, save
+│   ├── AddEntryPageViewModel.cs            # Form validation, camera, GPS, CV, save
 │   ├── StatisticsViewModel.cs              # Macro totals + chart data computation
 │   ├── GalleryViewModel.cs                 # Photo-only filtered collection
 │   ├── MapViewModel.cs                     # Location → coordinate hashing + pin set
@@ -259,7 +259,7 @@ FoodDrinkApp/
 │
 ├── Views/
 │   ├── MainPage.xaml / .cs                 # Home — card list + empty state + swipe-to-delete
-│   ├── AddEntryPage.xaml / .cs             # Form — camera, GPS, nutrition, AI fill
+│   ├── AddEntryPage.xaml / .cs             # Form — camera, GPS, nutrition, CV fill
 │   ├── StatisticsPage.xaml / .cs           # Donut + bar charts + totals card
 │   ├── GalleryPage.xaml / .cs              # 2-column photo grid with pull-to-refresh
 │   ├── MapPage.xaml / .cs                  # Interactive map with restaurant pins
@@ -269,9 +269,9 @@ FoodDrinkApp/
 │
 ├── Services/
 │   ├── FoodLogService.cs                   # mockapi.io CRUD + Task.Run offloading + local cache
-│   ├── ComputerVisionService.cs            # AI food classification (HuggingFace scaffold + MVP sim)
+│   ├── ComputerVisionService.cs            # Automated food classification (HuggingFace scaffold + MVP sim)
 │   ├── AccessibilityService.cs             # Large-text font scaling engine
-│   ├── SpeechService.cs                    # TTS wrapper with Chinese locale preference
+│   ├── SpeechService.cs                    # TTS wrapper with native locale settings
 │   └── MockApiConfig.cs                    # mockapi.io endpoint URL
 │
 ├── Converters/
@@ -337,32 +337,6 @@ The `Map` tab uses `Microsoft.Maui.Controls.Maps`. On Android a **Google Maps AP
 > ⚠️ Only **one** API key declaration is permitted — declaring both `maps.v2.API_KEY` and `geo.API_KEY` causes a `Java.Lang.RuntimeException` crash. This has been fixed in the manifest.
 
 To get a real key: [Google Cloud Console → Maps SDK for Android](https://console.cloud.google.com/google/maps-apis). **Without a real key the map renders as a blank grid — this is expected behaviour and the app does not crash.** Restaurant pins still appear on the grid.
-
----
-
-## 🎥 Screencast Demo Checklist
-
-For marking purposes the screencast should cover:
-
-| # | Item | Scoring Criterion |
-|---|---|---|
-| 1 | Introduce "Foodie Log" — Food & Drink theme | Theme compliance |
-| 2 | Browse home screen with food-memory cards | Functionality |
-| 3 | Search across name, restaurant, review, location | Functionality |
-| 4 | Swipe left to delete → confirmation → haptic | Advanced functionality (gestures) |
-| 5 | Add a new memory: form, star rating, validation | Validation + Error Handling |
-| 6 | 📷 Take Photo → AI auto-fill dish name | Mobile Hardware (Camera) + Advanced (AI CV) |
-| 7 | 📍 Get Location → GPS reverse-geocode | Mobile Hardware (Geolocation) |
-| 8 | Navigate 5-tab bar: Gallery, Statistics, Map, Profile | UI/UX + Functionality |
-| 9 | Statistics page: donut + bar charts | Advanced functionality (charts) |
-| 10 | Gallery: photo grid with pull-to-refresh | UI/UX |
-| 11 | Map: restaurant pins on interactive map | Mobile Hardware (Maps) |
-| 12 | Profile: aggregate user statistics | Functionality |
-| 13 | Dark mode toggle + Large-text mode | Accessibility |
-| 14 | TalkBack / screen-reader narration examples | Accessibility (WCAG) |
-| 15 | Walk through key code: MVVM, Models, Services, DI | Code Quality |
-| 16 | Show Android + Windows build output | Deployment |
-| 17 | Show GitHub commit history and README | GitHub Usage |
 
 ---
 
