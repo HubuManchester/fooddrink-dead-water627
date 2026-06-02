@@ -32,22 +32,19 @@ public partial class ProfileViewModel : BaseViewModel
         try
         {
             IsBusy = true;
+
+            // All-time aggregate data — no date filter.
+            // The Profile page is a lifetime dashboard, not a daily tracker.
             var items = await FoodLogService.SearchAsync(null);
 
-            // Filter today's entries for daily-calorie tracking
-            var today = DateTime.Today;
-            var todayItems = items
-                .Where(i => i.Date.Date == today)
-                .ToList();
-
-            TotalMemories = todayItems.Count;
-            TotalPhotos = todayItems.Count(i => !string.IsNullOrWhiteSpace(i.ImagePath));
-            TotalCalories = todayItems.Sum(i => i.Calories);
-            AverageRating = todayItems.Count > 0
-                ? Math.Round(todayItems.Average(i => i.Rating), 1)
+            TotalMemories = items.Count;
+            TotalPhotos = items.Count(i => !string.IsNullOrWhiteSpace(i.ImagePath));
+            TotalCalories = items.Sum(i => i.Calories);
+            AverageRating = items.Count > 0
+                ? Math.Round(items.Average(i => i.Rating), 1)
                 : 0;
 
-            var top = todayItems
+            var top = items
                 .GroupBy(i => i.RestaurantName)
                 .OrderByDescending(g => g.Count())
                 .FirstOrDefault();
