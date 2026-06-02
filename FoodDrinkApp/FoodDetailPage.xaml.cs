@@ -3,93 +3,71 @@ using FoodDrinkApp.Services;
 
 namespace FoodDrinkApp;
 
+/// <summary>
+/// Detail dashboard for a single food memory entry loaded from the
+/// cloud data service.  Uses compiled XAML bindings to
+/// <see cref="FoodModel"/> — no manual label assignment needed.
+/// Reached via Shell navigation from the MainPage card list.
+/// </summary>
+/// <remarks>
+/// Text-to-speech and hardware vibration are intentionally excluded
+/// from this page.  The target test device lacks stable system-level
+/// TTS and haptic support, so the page only renders pure data-driven
+/// content that is safe across all platforms.
+/// </remarks>
 [QueryProperty(nameof(ItemId), "id")]
 public partial class FoodDetailPage : ContentPage
 {
-    private FoodItem? currentItem;
+    private FoodModel? _currentItem;
 
+    /// <summary>
+    /// Parameterless constructor.  BindingContext is set once the item
+    /// loads via the <c>ItemId</c> query property.
+    /// </summary>
     public FoodDetailPage()
     {
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Applies large-text accessibility scaling each time the page
+    /// appears.
+    /// </summary>
     protected override void OnAppearing()
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
     }
 
-    protected override void OnDisappearing()
-    {
-        SpeechService.Stop();
-        base.OnDisappearing();
-    }
-
+    /// <summary>
+    /// Navigation query-property setter.  Triggers an async load of the
+    /// food memory identified by <paramref name="id"/>.
+    /// </summary>
     public string ItemId
     {
         set => _ = LoadItemAsync(value);
     }
 
+    /// <summary>
+    /// Fetches the <see cref="FoodModel"/> from the data service and
+    /// assigns it as the page's BindingContext, populating all compiled
+    /// bindings automatically.
+    /// </summary>
     private async Task LoadItemAsync(string id)
     {
-        currentItem = await FoodCatalogService.GetByIdAsync(id);
-        BindingContext = currentItem;
-        RenderItem();
-    }
+        _currentItem = await FoodLogService.GetByIdAsync(id);
 
-    private void RenderItem()
-    {
-        if (currentItem is null)
+        if (_currentItem is null)
         {
-            NameLabel.Text = "Record not found";
-            DescriptionLabel.Text = "The selected food or drink could not be loaded.";
-            return;
+            _currentItem = new FoodModel
+            {
+                Name = "Record not found",
+                Review = "The selected food memory could not be loaded.",
+                RestaurantName = "—",
+                Location = string.Empty
+            };
         }
 
-        NameLabel.Text = currentItem.Name;
-        CategoryLabel.Text = currentItem.Category;
-        CaloriesLabel.Text = currentItem.CaloriesLabel;
-        MacroLabel.Text = currentItem.MacroSummary;
-        DescriptionLabel.Text = currentItem.Description;
-        AllergyLabel.Text = currentItem.AllergyNote;
-        SemanticProperties.SetDescription(NameLabel, currentItem.AccessibleSummary);
-    }
-
-    private async void OnSpeakClicked(object? sender, EventArgs e)
-    {
-        if (currentItem is null)
-        {
-            await DisplayAlert("Missing record", "There is no nutrition summary to read.", "OK");
-            return;
-        }
-
-        try
-        {
-            await SpeechService.SpeakAsync(currentItem.AccessibleSummary);
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Text to speech unavailable", ex.Message, "OK");
-        }
-    }
-
-    private void OnStopSpeechClicked(object? sender, EventArgs e)
-    {
-        SpeechService.Stop();
-        SemanticScreenReader.Announce("Reading stopped.");
-    }
-
-    private async void OnVibrateClicked(object? sender, EventArgs e)
-    {
-        try
-        {
-            Vibration.Default.Vibrate(TimeSpan.FromMilliseconds(500));
-            HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
-            await DisplayAlert("Reminder", "Vibration feedback has been triggered.", "OK");
-        }
-        catch (Exception ex)
-        {
-            await DisplayAlert("Vibration unavailable", ex.Message, "OK");
-        }
+        BindingContext = _currentItem;
     }
 }

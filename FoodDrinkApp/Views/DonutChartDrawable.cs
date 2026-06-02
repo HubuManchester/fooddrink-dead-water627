@@ -2,19 +2,9 @@ namespace FoodDrinkApp.Views;
 
 /// <summary>
 /// Draws a donut chart showing macronutrient (Protein / Carbs / Fat) ratios
-/// using <see cref="Microsoft.Maui.Graphics"/>.  Rendered directly by MAUI
-/// <c>GraphicsView</c> — zero external chart-library dependencies.
+/// using <see cref="Microsoft.Maui.Graphics"/>.  When <see cref="GoalCalories"/>
+/// is set the centre label displays progress toward the daily calorie target.
 /// </summary>
-/// <remarks>
-/// <para>Visual structure (clockwise from 12-o'clock):</para>
-/// <list type="bullet">
-///   <item>Protein (pink, #FF6384) → Carbs (yellow, #FFCE56) → Fat (blue, #36A2EB)</item>
-///   <item>Each arc segment is approximated with small line-segment paths.</item>
-///   <item>Percentage labels hover outside each arc at the segment midpoint.</item>
-///   <item>Centre text shows total kcal; a three-colour legend sits at the bottom.</item>
-///   <item>When no nutrition data exists a grey placeholder ring is drawn.</item>
-/// </list>
-/// </remarks>
 public sealed class DonutChartDrawable : IDrawable
 {
     /// <summary>Grams of protein across all entries.</summary>
@@ -25,6 +15,19 @@ public sealed class DonutChartDrawable : IDrawable
 
     /// <summary>Grams of fat across all entries.</summary>
     public float Fat { get; set; }
+
+    /// <summary>
+    /// Daily calorie goal from user preferences (linked from Settings).
+    /// When greater than zero the centre label changes from a plain kcal
+    /// count to a progress indicator (e.g. "1 200 / 2 000 kcal").
+    /// </summary>
+    public int GoalCalories { get; set; }
+
+    /// <summary>
+    /// Total calories consumed from the current data set.
+    /// Used alongside <see cref="GoalCalories"/> for goal progress display.
+    /// </summary>
+    public int TotalCaloriesConsumed { get; set; }
 
     // ── Colour palette ────────────────────────────────
     private static readonly Color ProteinColor = Color.FromArgb("#FF6384");
@@ -42,7 +45,7 @@ public sealed class DonutChartDrawable : IDrawable
         float cx          = dirtyRect.Width / 2f;
         float cy          = dirtyRect.Height / 2f;
         float outerRadius = Math.Min(cx, cy) - 10f;
-        float innerRadius = outerRadius * 0.55f;    // donut hole — 55 % of outer
+        float innerRadius = outerRadius * 0.55f;
         float lineWidth   = outerRadius - innerRadius;
 
         // ── Empty-state fallback ─────────────────────
@@ -71,7 +74,7 @@ public sealed class DonutChartDrawable : IDrawable
             (Fat,     FatColor,     "Fat"),
         ];
 
-        float startAngle = -90f; // 12-o'clock position
+        float startAngle = -90f;
         foreach (var slice in slices)
         {
             if (slice.Value <= 0) continue;
@@ -79,7 +82,6 @@ public sealed class DonutChartDrawable : IDrawable
             float sweep    = slice.Value / total * 360f;
             float midAngle = startAngle + sweep / 2f;
 
-            // Thick arc segment via path approximation
             canvas.StrokeColor   = slice.Color;
             canvas.StrokeSize    = lineWidth;
             canvas.StrokeLineCap = LineCap.Butt;
@@ -88,7 +90,6 @@ public sealed class DonutChartDrawable : IDrawable
             float startRad  = startAngle * MathF.PI / 180f;
             float midR      = (outerRadius + innerRadius) / 2f;
 
-            // Approximate the arc with N small line segments for smoothness
             int segments = Math.Max(8, (int)(sweep / 2));
             path.MoveTo(
                 cx + midR * MathF.Cos(startRad),
@@ -104,9 +105,8 @@ public sealed class DonutChartDrawable : IDrawable
 
             canvas.DrawPath(path);
 
-            // Percentage label at the arc midpoint, outside the ring
             float pct     = slice.Value / total * 100f;
-            float labelR  = outerRadius + 18f;   // label radius
+            float labelR  = outerRadius + 18f;
             float lx      = cx + labelR * MathF.Cos(midAngle * MathF.PI / 180f);
             float ly      = cy + labelR * MathF.Sin(midAngle * MathF.PI / 180f);
 
@@ -120,13 +120,33 @@ public sealed class DonutChartDrawable : IDrawable
             startAngle += sweep;
         }
 
-        // ── Centre label (total kcal) ────────────────
-        canvas.FontSize  = 13;
-        canvas.FontColor = Color.FromArgb("#666666");
-        canvas.DrawString(
-            $"{total:F0} kcal",
-            cx - 50, cy - 9, 100, 18,
-            HorizontalAlignment.Center, VerticalAlignment.Center);
+        // ── Centre label ─────────────────────────────
+        if (GoalCalories > 0)
+        {
+            // Show goal-aware label: consumed / goal
+            canvas.FontSize  = 11;
+            canvas.FontColor = Color.FromArgb("#888888");
+            canvas.DrawString(
+                $"{TotalCaloriesConsumed} / {GoalCalories}",
+                cx - 55, cy - 14, 110, 16,
+                HorizontalAlignment.Center, VerticalAlignment.Center);
+
+            canvas.FontSize  = 13;
+            canvas.FontColor = Color.FromArgb("#F29B38");
+            canvas.DrawString(
+                "kcal goal",
+                cx - 55, cy + 4, 110, 16,
+                HorizontalAlignment.Center, VerticalAlignment.Center);
+        }
+        else
+        {
+            canvas.FontSize  = 13;
+            canvas.FontColor = Color.FromArgb("#666666");
+            canvas.DrawString(
+                $"{total:F0} kcal",
+                cx - 50, cy - 9, 100, 18,
+                HorizontalAlignment.Center, VerticalAlignment.Center);
+        }
 
         // ── Bottom legend ────────────────────────────
         float legendY = dirtyRect.Height - 26f;

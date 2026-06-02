@@ -3,24 +3,23 @@ namespace FoodDrinkApp.Views;
 /// <summary>
 /// Draws a horizontal bar chart for category-level statistics (e.g. average
 /// calories per star rating group) using <see cref="Microsoft.Maui.Graphics"/>.
-/// Zero external dependencies — rendered directly by a MAUI <c>GraphicsView</c>.
+/// Optionally renders a vertical goal reference line when
+/// <see cref="GoalCalories"/> is set, linking directly to the daily calorie
+/// goal preference from Settings.
 /// </summary>
-/// <remarks>
-/// <para>Layout math:</para>
-/// <list type="bullet">
-///   <item>Left margin (70 px) reserved for category labels.</item>
-///   <item>Remaining width scaled so the longest bar fills the chart area.</item>
-///   <item>Bars are rounded rectangles with 4 px corner radius.</item>
-///   <item>Vertical spacing distributed equally between bars.</item>
-/// </list>
-/// </remarks>
 public sealed class BarChartDrawable : IDrawable
 {
     /// <summary>
     /// List of (label, numeric value, fill colour) entries to render as bars.
-    /// Set from the ViewModel after computing statistics.
     /// </summary>
     public List<(string Label, float Value, Color Color)> Bars { get; set; } = [];
+
+    /// <summary>
+    /// Daily calorie goal from user preferences.  When greater than zero
+    /// a dashed vertical reference line is drawn so the user can visually
+    /// compare per-rating averages against their target.
+    /// </summary>
+    public int GoalCalories { get; set; }
 
     /// <inheritdoc />
     public void Draw(ICanvas canvas, RectF dirtyRect)
@@ -41,45 +40,81 @@ public sealed class BarChartDrawable : IDrawable
         }
 
         // ── Scale calculations ───────────────────────
-        // Ensure maxValue ≥ 1 so the shortest bar has a positive width.
-        float maxValue = Bars.Max(b => b.Value);
+        float maxValue = Math.Max(Bars.Max(b => b.Value), GoalCalories > 0 ? GoalCalories : 0);
         if (maxValue <= 0) maxValue = 1;
 
         float marginLeft   = 70f;
-        float marginRight  = 16f;
+        float marginRight  = 8f;
         float marginTop    = 12f;
-        float marginBottom = 12f;
+        float marginBottom = 24f;
+
+        // Reserve a fixed zone on the right for numeric value labels
+        // so they never get pushed off-screen even when bars are wide.
+        const float labelZoneWidth = 55f;
 
         float chartLeft    = marginLeft;
         float chartRight   = dirtyRect.Width - marginRight;
         float chartWidth   = chartRight - chartLeft;
+
+        // Bars must not exceed chartWidth minus the label zone,
+        // guaranteeing every numeric label stays in-bounds.
+        float barMaxWidth  = chartWidth - labelZoneWidth;
+        if (barMaxWidth < 20f) barMaxWidth = 20f;
+
         float barAreaHeight = dirtyRect.Height - marginTop - marginBottom;
 
-        // Dynamically size bars so they fit with equal spacing.
         float barHeight  = Math.Min(28f, barAreaHeight / Bars.Count - 8f);
         float barSpacing = (barAreaHeight - barHeight * Bars.Count) / (Bars.Count + 1);
 
-        float y = marginTop + barSpacing;
+        // ── Goal reference line ──────────────────────
+        if (GoalCalories > 0)
+        {
+            // Scale the goal line position using the bar-visible width
+            // so it stays correctly aligned with rendered bars.
+            float goalX = chartLeft + GoalCalories / maxValue * barMaxWidth;
+            goalX = Math.Clamp(goalX, chartLeft, chartLeft + barMaxWidth);
+
+            canvas.StrokeColor = Color.FromArgb("#F29B38");
+            canvas.StrokeSize  = 2f;
+            canvas.StrokeDashPattern = [6f, 4f];
+            canvas.DrawLine(goalX, marginTop, goalX, dirtyRect.Height - marginBottom);
+
+            // Goal label sits in the reserved label zone, right-aligned.
+            canvas.FontSize  = 9;
+            canvas.FontColor = Color.FromArgb("#F29B38");
+            canvas.DrawString(
+                $"Goal: {GoalCalories}",
+                chartLeft + barMaxWidth + 2, dirtyRect.Height - marginBottom + 2,
+                labelZoneWidth - 2, 12,
+                HorizontalAlignment.Right, VerticalAlignment.Top);
+
+            canvas.StrokeDashPattern = null;
+        }
 
         // ── Render each bar ──────────────────────────
+        float y = marginTop + barSpacing;
+
         foreach (var bar in Bars)
         {
-            float barWidth = bar.Value / maxValue * chartWidth;
-            if (barWidth < 3) barWidth = 3; // minimum visible width
+            // Scale to the bar-visible width so the longest bar
+            // ends exactly where the label zone begins.
+            float barWidth = bar.Value / maxValue * barMaxWidth;
+            if (barWidth < 3) barWidth = 3;
 
             // Filled bar rectangle (4 px corner radius)
             canvas.FillColor = bar.Color;
             canvas.FillRoundedRectangle(chartLeft, y, barWidth, barHeight, 4);
 
-            // Numeric value label right of the bar
+            // Numeric value label — drawn inside the reserved zone,
+            // right of the bar, fully protected from clipping.
             canvas.FontSize = 11;
             canvas.FontColor = Color.FromArgb("#555555");
             canvas.DrawString(
                 $"{bar.Value:F0}",
-                chartLeft + barWidth + 6, y, 50, barHeight,
+                chartLeft + barMaxWidth + 2, y, labelZoneWidth - 2, barHeight,
                 HorizontalAlignment.Left, VerticalAlignment.Center);
 
-            // Category label (e.g. "3⭐  (2)") left of the bar
+            // Category label left of the bar
             canvas.FontSize = 12;
             canvas.FontColor = Color.FromArgb("#333333");
             canvas.DrawString(

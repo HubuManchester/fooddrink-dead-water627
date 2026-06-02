@@ -132,7 +132,8 @@ public partial class MainPageViewModel : BaseViewModel
     private async Task GoToDetailAsync(FoodModel? item)
     {
         if (item is null) return;
-        await Shell.Current.DisplayAlert(item.Name, item.Review, "OK");
+        await Shell.Current.GoToAsync(
+            $"{nameof(FoodDetailPage)}?id={Uri.EscapeDataString(item.Id)}");
     }
 
     /// <summary>

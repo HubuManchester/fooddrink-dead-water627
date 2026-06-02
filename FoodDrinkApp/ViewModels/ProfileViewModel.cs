@@ -34,14 +34,20 @@ public partial class ProfileViewModel : BaseViewModel
             IsBusy = true;
             var items = await FoodLogService.SearchAsync(null);
 
-            TotalMemories = items.Count;
-            TotalPhotos = items.Count(i => !string.IsNullOrWhiteSpace(i.ImagePath));
-            TotalCalories = items.Sum(i => i.Calories);
-            AverageRating = items.Count > 0
-                ? Math.Round(items.Average(i => i.Rating), 1)
+            // Filter today's entries for daily-calorie tracking
+            var today = DateTime.Today;
+            var todayItems = items
+                .Where(i => i.Date.Date == today)
+                .ToList();
+
+            TotalMemories = todayItems.Count;
+            TotalPhotos = todayItems.Count(i => !string.IsNullOrWhiteSpace(i.ImagePath));
+            TotalCalories = todayItems.Sum(i => i.Calories);
+            AverageRating = todayItems.Count > 0
+                ? Math.Round(todayItems.Average(i => i.Rating), 1)
                 : 0;
 
-            var top = items
+            var top = todayItems
                 .GroupBy(i => i.RestaurantName)
                 .OrderByDescending(g => g.Count())
                 .FirstOrDefault();
@@ -57,10 +63,7 @@ public partial class ProfileViewModel : BaseViewModel
     [RelayCommand]
     private async Task GoToSettingsAsync()
     {
-        await Shell.Current.DisplayAlert(
-            "Settings",
-            "App version: 1.0\nTheme: Auto\nAccessibility: Large text, screen reader support, WCAG-aligned.",
-            "OK");
+        await Shell.Current.GoToAsync(nameof(Views.SettingsPage));
     }
 
     public ProfileViewModel()

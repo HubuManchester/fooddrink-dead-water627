@@ -18,5 +18,7 @@ public partial class AppShell : Shell
 
         // Non-tab pages that are navigated to via Shell.Current.GoToAsync
         Routing.RegisterRoute(nameof(Views.AddEntryPage), typeof(Views.AddEntryPage));
+        Routing.RegisterRoute(nameof(Views.SettingsPage), typeof(Views.SettingsPage));
+        Routing.RegisterRoute(nameof(FoodDetailPage), typeof(FoodDetailPage));
     }
 }

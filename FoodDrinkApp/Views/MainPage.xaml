@@ -16,17 +16,41 @@
 
     <!--
         Outer Grid handles the full-page layout.
-        Row 4 uses Star so the list fills all remaining vertical space.
+        Row 6 uses Star so the list fills all remaining vertical space.
         The entire structure is wrapped once — no nested ScrollViews.
         On landscape the Grid columns stretch horizontally and the
         CollectionView fills the available area naturally.
     -->
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*"
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*"
           Padding="20"
           RowSpacing="18">
 
+        <!-- ══════════════ Offline Connectivity Banner ══════════════
+             Hidden by default. Shown when the device loses network access
+             so the user knows the app is operating with cached data. -->
+        <Border x:Name="OfflineBanner"
+                IsVisible="False"
+                StrokeThickness="0"
+                BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A3520}"
+                Padding="10,8"
+                SemanticProperties.Description="Offline mode warning — the device has no internet connection">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="12" />
+            </Border.StrokeShape>
+            <HorizontalStackLayout Spacing="8" HorizontalOptions="Center">
+                <Label Text="⚠️"
+                       FontSize="15"
+                       VerticalOptions="Center" />
+                <Label Text="Offline Mode — Local Cache Active"
+                       FontSize="13" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light=#856404, Dark=#FFE69C}"
+                       VerticalOptions="Center"
+                       SemanticProperties.Description="You are currently offline. Using locally cached data." />
+            </HorizontalStackLayout>
+        </Border>
+
         <!-- ══════════════ Welcome Header ══════════════ -->
-        <VerticalStackLayout Spacing="6">
+        <VerticalStackLayout Grid.Row="1" Spacing="6">
             <Label Text="🍜 Foodie Log"
                    FontSize="32"
                    FontAttributes="Bold"
@@ -40,14 +64,17 @@
         </VerticalStackLayout>
 
         <!-- ══════════════ Search + Add ══════════════ -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="12">
             <Border StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
                     BackgroundColor="{AppThemeBinding Light=#FFFFFA, Dark=#1A1712}"
                     Padding="0">
                 <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
+                    <RoundRectangle CornerRadius="14" />
                 </Border.StrokeShape>
+                <Border.Shadow>
+                    <Shadow Brush="#18000000" Offset="0,2" Radius="8" Opacity="0.2" />
+                </Border.Shadow>
                 <SearchBar x:Name="SearchBar"
                            Placeholder="Search memories..."
                            Text="{Binding SearchQuery}"
@@ -69,8 +96,32 @@
                     SemanticProperties.Hint="Add a new food memory entry" />
         </Grid>
 
+        <!-- ══════════════ Random Meal Picker ══════════════ -->
+        <Border Grid.Row="3"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#F29B38, Dark=#FFB15D}"
+                BackgroundColor="{AppThemeBinding Light=#FFF8EC, Dark=#2A1F10}"
+                Padding="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="14" />
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#22000000" Offset="0,3" Radius="10" Opacity="0.28" />
+            </Border.Shadow>
+            <Button x:Name="RandomPickButton"
+                    Text="🎲 Tap or Shake for a Random Pick!"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light=#D9472B, Dark=#FFB15D}"
+                    Clicked="OnRandomPickClicked"
+                    Padding="14,12"
+                    SemanticProperties.Description="Pick a random food memory from your diary"
+                    SemanticProperties.Hint="Tap this button or shake your device to get a random food suggestion" />
+        </Border>
+
         <!-- ══════════════ Loading indicator ══════════════ -->
-        <ActivityIndicator Grid.Row="2"
+        <ActivityIndicator Grid.Row="4"
                            IsRunning="{Binding IsBusy}"
                            IsVisible="{Binding IsBusy}"
                            HeightRequest="36"
@@ -78,13 +129,13 @@
                            SemanticProperties.Description="Loading food memories from the cloud" />
 
         <!-- ══════════════ Status banner ══════════════ -->
-        <Border Grid.Row="3"
+        <Border Grid.Row="5"
                 IsVisible="{Binding HasStatusMessage}"
                 StrokeThickness="0"
                 BackgroundColor="{AppThemeBinding Light=#FFF3CD, Dark=#3A3520}"
                 Padding="10,8">
             <Border.StrokeShape>
-                <RoundRectangle CornerRadius="12" />
+                <RoundRectangle CornerRadius="14" />
             </Border.StrokeShape>
             <Label Text="{Binding StatusMessage}"
                    FontSize="13"
@@ -94,7 +145,7 @@
         </Border>
 
         <!-- ══════════════ Content area (list + empty state) ══════════════ -->
-        <Grid Grid.Row="4">
+        <Grid Grid.Row="6">
 
             <!-- ── Empty State ── -->
             <VerticalStackLayout IsVisible="{Binding IsEmpty}"
@@ -153,8 +204,11 @@
                                         Padding="16"
                                         Margin="0,0,0,12">
                                     <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="12" />
+                                        <RoundRectangle CornerRadius="14" />
                                     </Border.StrokeShape>
+                                    <Border.Shadow>
+                                        <Shadow Brush="#18000000" Offset="0,2" Radius="8" Opacity="0.22" />
+                                    </Border.Shadow>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding Source={RelativeSource AncestorType={x:Type vm:MainPageViewModel}}, Path=GoToDetailCommand}"

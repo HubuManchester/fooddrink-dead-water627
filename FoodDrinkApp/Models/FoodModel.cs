@@ -128,4 +128,59 @@ public sealed partial class FoodModel : ObservableObject
         HasNutrition
             ? $"{Calories} kcal  ·  P:{Protein}g  C:{Carbs}g  F:{Fat}g"
             : string.Empty;
+
+    // ── Detail-page display helpers ───────────────────
+
+    /// <summary>Formatted calorie label, e.g. "520 kcal".</summary>
+    [JsonIgnore]
+    public string CaloriesLabel => $"{Calories} kcal";
+
+    /// <summary>True when this entry exceeds the 800 kcal threshold.</summary>
+    [JsonIgnore]
+    public bool IsHighCalorie => Calories > 800;
+
+    /// <summary>Semantic alert text for the calorie banner.</summary>
+    [JsonIgnore]
+    public string CalorieAlertText => Calories > 800
+        ? "🚨 High-Calorie Intake Alert"
+        : "✅ Healthy Portion Size";
+
+    /// <summary>Background colour for the calorie alert banner.</summary>
+    [JsonIgnore]
+    public Color CalorieAlertBackground => Calories > 800
+        ? Color.FromArgb("#FDE8E8")
+        : Color.FromArgb("#E6F4EA");
+
+    /// <summary>Text colour for the calorie alert banner.</summary>
+    [JsonIgnore]
+    public Color CalorieAlertTextColor => Calories > 800
+        ? Color.FromArgb("#C62828")
+        : Color.FromArgb("#2E7D32");
+
+    /// <summary>Macro assessment label for protein.</summary>
+    [JsonIgnore]
+    public string ProteinLevel => Protein switch
+    {
+        >= 30 => "High",
+        >= 10 => "Balanced",
+        _     => "Low"
+    };
+
+    /// <summary>Macro assessment label for carbohydrates.</summary>
+    [JsonIgnore]
+    public string CarbsLevel => Carbs switch
+    {
+        >= 50 => "High",
+        >= 20 => "Balanced",
+        _     => "Low"
+    };
+
+    /// <summary>Macro assessment label for fat.</summary>
+    [JsonIgnore]
+    public string FatLevel => Fat switch
+    {
+        >= 20 => "High",
+        >= 5  => "Balanced",
+        _     => "Low"
+    };
 }

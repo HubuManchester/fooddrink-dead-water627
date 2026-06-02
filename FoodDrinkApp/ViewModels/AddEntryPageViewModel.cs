@@ -143,33 +143,61 @@ public partial class AddEntryPageViewModel : BaseViewModel
             var fileName = $"foodie_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
             var localPath = Path.Combine(FileSystem.CacheDirectory, fileName);
 
-            using var sourceStream = await photo.OpenReadAsync();
-            using var fileStream = File.OpenWrite(localPath);
-            await sourceStream.CopyToAsync(fileStream);
+            // Read the full photo stream once.  We save a copy
+            // to disk for the Image preview AND capture the byte
+            // length in memory so the AI classifier can use a
+            // deterministic seed without touching the file again.
+            // This avoids a file-lock race with MAUI's Image control.
+            byte[] photoBytes;
+            using (var sourceStream = await photo.OpenReadAsync())
+            {
+                using var ms = new MemoryStream();
+                await sourceStream.CopyToAsync(ms);
+                photoBytes = ms.ToArray();
+            }
 
+            // Write to disk — this is now a separate operation
+            // from the MemoryStream above.
+            await File.WriteAllBytesAsync(localPath, photoBytes);
+
+            // Attach the preview NOW.  MAUI's Image will open the
+            // file for shared read; the AI classifier below reads
+            // from the in-memory byte buffer so there is zero lock
+            // contention.
             ImagePath = localPath;
             SemanticScreenReader.Announce("Photo captured and saved.");
 
             // ── AI Computer Vision classification ─────
-            // Open a stream from the saved file and send it to
-            // ComputerVisionService for food recognition.
             try
             {
                 SemanticScreenReader.Announce("Analysing photo with AI...");
 
-                using var classifyStream = File.OpenRead(localPath);
+                // Feed a MemoryStream backed by the in-memory bytes.
+                // ComputerVisionService reads .Length for its hash
+                // and there is no file handle to contend with.
+                using var classifyStream = new MemoryStream(photoBytes);
                 string aiLabel = await ComputerVisionService.ClassifyFoodImageAsync(classifyStream);
 
                 if (!string.IsNullOrWhiteSpace(aiLabel))
                 {
-                    // Auto-fill the dish name field with the AI result
-                    FoodName = aiLabel;
+                    // Camera Activity on Android tears down the UI
+                    // SynchronizationContext; we must explicitly marshal
+                    // the property update + haptic + announcement back to
+                    // the main thread so the XAML binding engine sees the
+                    // PropertyChanged event.
+                    MainThread.BeginInvokeOnMainThread(() =>
+                    {
+                        // Auto-fill the dish name field with the AI result.
+                        // FoodName is an [ObservableProperty] so the source
+                        // generator fires PropertyChanged automatically.
+                        FoodName = aiLabel;
 
-                    // Haptic confirmation so the user feels the AI result arrive
-                    HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+                        // Haptic confirmation so the user feels the AI result arrive
+                        HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 
-                    SemanticScreenReader.Announce(
-                        $"AI recognised: {aiLabel}. Dish name auto-filled.");
+                        SemanticScreenReader.Announce(
+                            $"AI recognised: {aiLabel}. Dish name auto-filled.");
+                    });
                 }
             }
             catch (Exception aiEx)

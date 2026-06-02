@@ -4,7 +4,7 @@ public static class SpeechService
 {
     private static CancellationTokenSource? currentSpeech;
 
-    public static async Task SpeakAsync(string text)
+    public static async Task<bool> SpeakAsync(string text)
     {
         Stop();
 
@@ -19,9 +19,23 @@ public static class SpeechService
         try
         {
             await TextToSpeech.Default.SpeakAsync(text, options, currentSpeech.Token);
+            return true;
         }
         catch (OperationCanceledException)
         {
+            // Cancelled by user — not a failure.
+            return true;
+        }
+        catch (FeatureNotSupportedException)
+        {
+            // Device or emulator without TTS engine — silent fallback.
+            return false;
+        }
+        catch (Exception)
+        {
+            // Engine lag, unavailable locale, or any other runtime TTS fault.
+            // Silently fall back so the user experience is never interrupted.
+            return false;
         }
     }
 

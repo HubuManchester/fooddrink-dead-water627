@@ -35,11 +35,21 @@
             (a single com.google.android.geo.API_KEY meta-data entry).
             The map auto-centres based on pin locations once they are added.
         -->
-        <maps:Map Grid.Row="2"
-                  x:Name="RestaurantMap"
-                  MapType="Street"
-                  IsShowingUser="False"
-                  SemanticProperties.Description="Interactive map showing where your food memories took place" />
+        <Border Grid.Row="2"
+                StrokeThickness="1"
+                Stroke="{AppThemeBinding Light=#F0D6B8, Dark=#3E3023}"
+                Padding="0">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="14" />
+            </Border.StrokeShape>
+            <Border.Shadow>
+                <Shadow Brush="#18000000" Offset="0,2" Radius="8" Opacity="0.22" />
+            </Border.Shadow>
+            <maps:Map x:Name="RestaurantMap"
+                      MapType="Street"
+                      IsShowingUser="False"
+                      SemanticProperties.Description="Interactive map showing where your food memories took place" />
+        </Border>
 
     </Grid>
 </ContentPage>
